@@ -267,3 +267,11 @@ def privacy_view(request):
         'categories': Category.objects.all(),
     }
     return render(request, 'blog/privacy.html', context)
+
+
+def terms_view(request):
+    """Terms of service page view."""
+    context = {
+        'categories': Category.objects.all(),
+    }
+    return render(request, 'blog/terms.html', context)

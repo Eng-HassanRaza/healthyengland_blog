@@ -1,0 +1,71 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Terms of Service - Healthy England{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h1 class="h2 mb-4">Terms of Service</h1>
+                    <p class="text-muted">Last updated: {{ now|date:"F d, Y" }}</p>
+
+                    <p>Welcome to Healthy England ("we", "us", or "our"). By accessing or using our website healthyengland.com (the "Site"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, please do not use our Site.</p>
+
+                    <h5 class="mt-4">1. Use of the Site</h5>
+                    <p>You may use the Site for lawful purposes only. You agree not to:</p>
+                    <ul>
+                        <li>Violate any applicable laws or regulations</li>
+                        <li>Post or transmit any harmful, offensive, or inappropriate content</li>
+                        <li>Attempt to gain unauthorized access to any part of the Site</li>
+                        <li>Use automated systems (e.g., bots, scrapers) without our prior written consent</li>
+                        <li>Impersonate any person or entity, or falsely represent your affiliation</li>
+                    </ul>
+
+                    <h5 class="mt-4">2. Intellectual Property</h5>
+                    <p>All content on the Site, including text, images, logos, graphics, and software, is the property of Healthy England or its licensors and is protected by copyright, trademark, and other intellectual property laws. You may not reproduce, distribute, modify, or create derivative works without our prior written permission.</p>
+
+                    <h5 class="mt-4">3. User Content</h5>
+                    <p>By submitting comments, feedback, or other content to the Site ("User Content"), you grant us a non-exclusive, royalty-free, perpetual, and worldwide license to use, reproduce, modify, and display such content. You represent that you own or have the necessary rights to share your User Content and that it does not violate any third-party rights.</p>
+
+                    <h5 class="mt-4">4. Disclaimer of Warranties</h5>
+                    <p>The Site and its content are provided "as is" without warranties of any kind, either express or implied. We do not warrant that the Site will be uninterrupted, error-free, or free of viruses or other harmful components. Your use of the Site is at your own risk.</p>
+
+                    <h5 class="mt-4">5. Health Information Disclaimer</h5>
+                    <p>The information provided on this Site is for educational and informational purposes only. It is not intended as medical advice and should not replace professional medical consultation. Always seek the advice of your physician or other qualified health provider with any questions you may have regarding a medical condition.</p>
+
+                    <h5 class="mt-4">6. Limitation of Liability</h5>
+                    <p>To the maximum extent permitted by law, Healthy England and its affiliates, officers, employees, or agents shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising out of or related to your use of the Site, even if we have been advised of the possibility of such damages.</p>
+
+                    <h5 class="mt-4">7. Third-Party Links</h5>
+                    <p>The Site may contain links to third-party websites. We are not responsible for the content, accuracy, or practices of these external sites. Your use of third-party websites is at your own risk and subject to their terms and conditions.</p>
+
+                    <h5 class="mt-4">8. Indemnification</h5>
+                    <p>You agree to indemnify, defend, and hold harmless Healthy England and its affiliates from any claims, liabilities, damages, losses, and expenses (including legal fees) arising out of your use of the Site or violation of these Terms.</p>
+
+                    <h5 class="mt-4">9. Modifications to Terms</h5>
+                    <p>We reserve the right to modify these Terms at any time. Changes will be posted on this page with the updated date. Your continued use of the Site after any changes constitutes acceptance of the modified Terms.</p>
+
+                    <h5 class="mt-4">10. Termination</h5>
+                    <p>We reserve the right to suspend or terminate your access to the Site at any time, without notice, for conduct that we believe violates these Terms or is harmful to other users, us, or third parties.</p>
+
+                    <h5 class="mt-4">11. Governing Law</h5>
+                    <p>These Terms shall be governed by and construed in accordance with the laws of England and Wales, without regard to its conflict of law provisions. Any disputes arising from these Terms or your use of the Site shall be subject to the exclusive jurisdiction of the courts of England and Wales.</p>
+
+                    <h5 class="mt-4">12. Contact Us</h5>
+                    <p>If you have any questions about these Terms of Service, please contact us at <a href="mailto:info@healthyengland.com">info@healthyengland.com</a> or via our <a href="{% url 'blog:contact' %}">Contact</a> page.</p>
+
+                    <div class="mt-4">
+                        <a href="{% url 'blog:post_list' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
