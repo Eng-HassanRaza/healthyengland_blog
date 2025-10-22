@@ -1,0 +1,211 @@
+================================================================================
+HEALTHY ENGLAND BLOG - DEPLOYMENT INFORMATION
+================================================================================
+
+DEPLOYMENT COMPLETED: October 22, 2025
+Domain: healthyengland.com
+
+================================================================================
+SYSTEM INFORMATION
+================================================================================
+
+Project Location: /var/www/healthyengland
+Python Virtual Environment: /var/www/healthyengland/venv
+Database: PostgreSQL (healthyengland)
+Web Server: Nginx
+Application Server: Gunicorn (3 workers)
+
+================================================================================
+DATABASE CREDENTIALS
+================================================================================
+
+Database Name: healthyengland
+Database User: healthyengland_user
+Database Password: healthyengland_pass123
+Database Host: localhost
+Database Port: 5432
+
+================================================================================
+DJANGO ADMIN ACCESS
+================================================================================
+
+Admin URL: https://healthyengland.com/admin/
+Username: admin
+Password: admin123
+Email: admin@healthyengland.com
+
+⚠️ IMPORTANT: Please change the admin password immediately after first login!
+
+================================================================================
+SERVICES STATUS
+================================================================================
+
+All services are configured to start automatically on system boot:
+
+- PostgreSQL: Active
+- Gunicorn: Active (3 workers)
+- Nginx: Active
+
+Check service status:
+  sudo systemctl status gunicorn
+  sudo systemctl status nginx
+  sudo systemctl status postgresql
+
+Restart services:
+  sudo systemctl restart gunicorn
+  sudo systemctl restart nginx
+
+================================================================================
+SSL CERTIFICATE SETUP
+================================================================================
+
+⚠️ IMPORTANT: SSL certificate installation requires DNS to be properly configured.
+
+Current Status: Certbot is installed, but SSL certificate couldn't be obtained
+because the domain DNS is not yet pointing to this server.
+
+Once your domain DNS is pointing to this server's IP address, run:
+
+  sudo certbot --nginx -d healthyengland.com -d www.healthyengland.com --non-interactive --agree-tos -m your-email@example.com --redirect
+
+This will:
+- Obtain a free SSL certificate from Let's Encrypt
+- Automatically configure Nginx for HTTPS
+- Set up automatic certificate renewal
+- Redirect HTTP to HTTPS
+
+Certificate renewal is automatic (handled by systemd timer).
+
+================================================================================
+DIRECTORY STRUCTURE
+================================================================================
+
+/var/www/healthyengland/
+├── venv/                  # Python virtual environment
+├── blog/                  # Blog application
+├── healthyengland/        # Project settings
+├── static/                # Static files source
+├── staticfiles/           # Collected static files (served by Nginx)
+├── media/                 # User uploaded files
+├── logs/                  # Django logs
+├── manage.py              # Django management script
+└── .env                   # Environment variables
+
+================================================================================
+MAINTENANCE COMMANDS
+================================================================================
+
+Activate virtual environment:
+  cd /var/www/healthyengland
+  source venv/bin/activate
+
+Django management commands:
+  python manage.py createsuperuser      # Create new admin user
+  python manage.py migrate               # Run database migrations
+  python manage.py collectstatic         # Collect static files
+  python manage.py shell                 # Open Django shell
+
+View logs:
+  sudo journalctl -u gunicorn            # Gunicorn logs
+  sudo journalctl -u nginx               # Nginx logs
+  tail -f logs/django.log                # Django application logs
+
+After making code changes:
+  1. Pull latest code: git pull
+  2. Activate venv: source venv/bin/activate
+  3. Install dependencies: pip install -r requirements.txt
+  4. Run migrations: python manage.py migrate
+  5. Collect static: python manage.py collectstatic --noinput
+  6. Restart Gunicorn: sudo systemctl restart gunicorn
+
+================================================================================
+FIREWALL CONFIGURATION
+================================================================================
+
+UFW Firewall is enabled with:
+- SSH (port 22)
+- HTTP (port 80)
+- HTTPS (port 443)
+
+Check firewall status:
+  sudo ufw status
+
+================================================================================
+ENVIRONMENT VARIABLES (.env)
+================================================================================
+
+Location: /var/www/healthyengland/.env
+
+Key variables:
+- SECRET_KEY: Django secret key
+- DEBUG: Set to False for production
+- ALLOWED_HOSTS: healthyengland.com,www.healthyengland.com
+- DATABASE_URL: PostgreSQL connection string
+- EMAIL_PASSWORD: Email password for healthyengland.com
+
+================================================================================
+NGINX CONFIGURATION
+================================================================================
+
+Configuration file: /etc/nginx/sites-available/healthyengland
+Symbolic link: /etc/nginx/sites-enabled/healthyengland
+
+Static files served from: /var/www/healthyengland/staticfiles/
+Media files served from: /var/www/healthyengland/media/
+
+Test Nginx configuration:
+  sudo nginx -t
+
+Reload Nginx:
+  sudo systemctl reload nginx
+
+================================================================================
+POSTGRESQL BACKUP
+================================================================================
+
+Backup database:
+  sudo -u postgres pg_dump healthyengland > backup_$(date +%Y%m%d).sql
+
+Restore database:
+  sudo -u postgres psql healthyengland < backup_file.sql
+
+================================================================================
+MONITORING AND TROUBLESHOOTING
+================================================================================
+
+Check if site is working:
+  curl -H "Host: healthyengland.com" http://localhost
+
+Check Gunicorn socket:
+  sudo systemctl status gunicorn.socket
+  file /run/gunicorn.sock
+
+Check Nginx error logs:
+  sudo tail -f /var/log/nginx/error.log
+
+Check Nginx access logs:
+  sudo tail -f /var/log/nginx/access.log
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Update DNS records to point to this server's IP address
+2. Run Certbot to obtain SSL certificate (command above)
+3. Change Django admin password
+4. Configure email settings in .env file
+5. Test the website thoroughly
+6. Set up regular database backups
+7. Configure monitoring (optional)
+
+================================================================================
+SUPPORT
+================================================================================
+
+Django Documentation: https://docs.djangoproject.com/
+Nginx Documentation: https://nginx.org/en/docs/
+Let's Encrypt: https://letsencrypt.org/
+Gunicorn Documentation: https://docs.gunicorn.org/
+
+================================================================================
+
