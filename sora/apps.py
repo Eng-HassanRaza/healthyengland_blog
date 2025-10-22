@@ -1,0 +1,12 @@
+from django.apps import AppConfig
+
+
+class SoraConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'sora'
+from django.apps import AppConfig
+
+
+class SoraConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'sora'

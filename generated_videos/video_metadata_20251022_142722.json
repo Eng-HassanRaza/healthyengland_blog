@@ -1,0 +1,18 @@
+{
+  "video_id": "video_68f8dbb9da2c8190905d98b9d8e8cc8000fcb31b91160778",
+  "object": "video",
+  "model": "sora-2",
+  "status": "queued",
+  "progress": 0,
+  "created_at": 1761139641,
+  "size": "1280x720",
+  "seconds": "4",
+  "prompt": "A beautiful sunset",
+  "parameters": {
+    "model": "sora-2",
+    "prompt": "A beautiful sunset",
+    "seconds": "4",
+    "size": "1280x720"
+  },
+  "timestamp": "2025-10-22 14:27:22"
+}

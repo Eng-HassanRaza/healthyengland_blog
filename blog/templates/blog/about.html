@@ -1,0 +1,114 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}About Us - Healthy England{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="text-center mb-5">
+                        <i class="fas fa-heart text-danger" style="font-size: 4rem;"></i>
+                        <h1 class="display-4 fw-bold text-primary mt-3">About Healthy England</h1>
+                        <p class="lead text-muted">Your trusted partner in health and wellness</p>
+                    </div>
+
+                    <div class="row mb-5">
+                        <div class="col-md-6">
+                            <h3 class="h4 mb-3">Our Mission</h3>
+                            <p class="text-muted">We are dedicated to providing accurate, evidence-based health information to help you make informed decisions about your wellbeing. Our goal is to empower you with knowledge that leads to a healthier, happier life.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="h4 mb-3">Our Vision</h3>
+                            <p class="text-muted">To become the leading source of health and wellness information in England, helping individuals and communities achieve optimal health through education, support, and evidence-based guidance.</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5">
+                        <div class="col-12">
+                            <h3 class="h4 mb-4">What We Offer</h3>
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-article text-primary mb-3" style="font-size: 2rem;"></i>
+                                        <h5>Expert Articles</h5>
+                                        <p class="small text-muted">Comprehensive health articles written by qualified professionals</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-heartbeat text-primary mb-3" style="font-size: 2rem;"></i>
+                                        <h5>Wellness Tips</h5>
+                                        <p class="small text-muted">Practical advice for maintaining a healthy lifestyle</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <i class="fas fa-users text-primary mb-3" style="font-size: 2rem;"></i>
+                                        <h5>Community Support</h5>
+                                        <p class="small text-muted">Connect with others on their health journey</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-5">
+                        <div class="col-12">
+                            <h3 class="h4 mb-4">Our Values</h3>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Evidence-Based</h6>
+                                            <p class="small text-muted mb-0">All our content is based on scientific research and medical evidence</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-shield-alt text-success me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Trustworthy</h6>
+                                            <p class="small text-muted mb-0">We prioritize accuracy and reliability in all our information</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-hand-holding-heart text-success me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Compassionate</h6>
+                                            <p class="small text-muted mb-0">We understand that health is personal and approach it with empathy</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-lightbulb text-success me-3 mt-1"></i>
+                                        <div>
+                                            <h6 class="mb-1">Empowering</h6>
+                                            <p class="small text-muted mb-0">We provide tools and knowledge to help you take control of your health</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <h3 class="h4 mb-4">Get in Touch</h3>
+                        <p class="text-muted mb-4">Have questions or suggestions? We'd love to hear from you!</p>
+                        <a href="{% url 'blog:contact' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-envelope me-2"></i>
+                            Contact Us
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
