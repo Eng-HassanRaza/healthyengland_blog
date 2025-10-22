@@ -178,3 +178,9 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+
+# Google Credentials
+google_credentials.json
+
+# Generated Videos
+generated_videos/

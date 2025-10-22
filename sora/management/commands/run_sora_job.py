@@ -11,33 +11,77 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('prompt', type=str, help='Prompt for video generation')
-        parser.add_argument('--duration', type=int, default=4, help='Duration: 4, 8, or 12 seconds')
-        parser.add_argument('--aspect-ratio', choices=['16:9', '9:16', '1:1'], default='16:9')
-        parser.add_argument('--style', type=str, help='Optional style')
-        parser.add_argument('--wait', action='store_true', help='Wait for completion and download')
-        parser.add_argument('--download', action='store_true', help='Download video when complete')
 
     def handle(self, *args, **options):
+        from django.conf import settings
+        
         prompt = options['prompt']
+        
+        # Get all settings from .env
+        duration = settings.SORA_DEFAULT_DURATION
+        aspect_ratio = settings.SORA_DEFAULT_ASPECT_RATIO
+        delete_local = settings.SORA_DELETE_LOCAL
+        upload_s3 = settings.SORA_AUTO_UPLOAD_S3
+        add_sheets = settings.SORA_AUTO_ADD_SHEETS
+        
+        self.stdout.write("="*70)
+        self.stdout.write(f"🎬 Generating Sora Video")
+        self.stdout.write("="*70)
+        self.stdout.write(f"Prompt: {prompt}")
+        self.stdout.write(f"Duration: {duration}s")
+        self.stdout.write(f"Aspect Ratio: {aspect_ratio} (720x1280)")
+        self.stdout.write(f"Upload to S3: {'Yes' if upload_s3 else 'No'}")
+        self.stdout.write(f"Add to Sheets: {'Yes' if add_sheets else 'No'}")
+        self.stdout.write(f"Delete Local: {'Yes' if delete_local else 'No'}")
+        self.stdout.write("="*70 + "\n")
+        
         generator = SoraVideoGenerator()
 
         result = generator.generate_video(
             prompt=prompt,
-            duration=options['duration'],
-            aspect_ratio=options['aspect_ratio'],
-            style=options.get('style')
+            duration=duration,
+            aspect_ratio=aspect_ratio
         )
 
         if result.get('error'):
             raise CommandError(result['error'])
 
         video_id = result.get('video_id')
-        self.stdout.write(self.style.SUCCESS(f"Started video job: {video_id}"))
+        self.stdout.write(self.style.SUCCESS(f"✅ Video generation started: {video_id}\n"))
 
-        if options['wait'] or options['download']:
-            status = generator.wait_for_completion(video_id)
-            if status.get('status') != 'completed':
-                raise CommandError(f"Job did not complete successfully: {status}")
-            if options['download']:
-                path = generator.download_video(video_id)
-                self.stdout.write(self.style.SUCCESS(f"Downloaded to: {path}"))
+        # Always wait and download
+        self.stdout.write("⏳ Waiting for video completion...")
+        status = generator.wait_for_completion(video_id)
+        
+        if status.get('status') != 'completed':
+            raise CommandError(f"Video generation failed: {status}")
+        
+        self.stdout.write(self.style.SUCCESS("✅ Video completed!\n"))
+        
+        # Download and process
+        self.stdout.write("⬇️  Downloading video...")
+        path = generator.download_video(
+            video_id,
+            upload_to_s3=upload_s3,
+            delete_local_after_s3=delete_local
+        )
+        
+        # Show results
+        self.stdout.write("\n" + "="*70)
+        self.stdout.write("🎉 SUCCESS!")
+        self.stdout.write("="*70)
+        
+        if path.startswith('http'):
+            self.stdout.write(f"S3 URL: {path}")
+            if delete_local:
+                self.stdout.write("Local file: Deleted")
+            if add_sheets:
+                self.stdout.write("Google Sheets: Added")
+        else:
+            self.stdout.write(f"Local file: {path}")
+            if upload_s3:
+                self.stdout.write("S3: Uploaded")
+            if add_sheets:
+                self.stdout.write("Google Sheets: Added")
+        
+        self.stdout.write("="*70)

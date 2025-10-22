@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap5',
     'django_summernote',
+    'storages',  # AWS S3 storage
     
     # Local apps
     'blog',
@@ -143,6 +144,37 @@ CSRF_TRUSTED_ORIGINS = ['https://healthyengland.com', 'https://www.healthyenglan
 # Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# AWS S3 Configuration for Sora Videos
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'healthyengland-sora-videos')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'us-east-1')
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+# S3 settings for Sora videos
+AWS_SORA_LOCATION = 'sora-videos'  # Folder in S3 bucket
+AWS_DEFAULT_ACL = None  # Don't use ACLs, rely on bucket policy instead
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',  # 1 day cache
+}
+
+# S3 URL generation
+AWS_S3_USE_SSL = True
+AWS_QUERYSTRING_AUTH = False  # Don't add auth parameters to URLs
+
+# Google Sheets Configuration
+GOOGLE_CREDENTIALS_FILE = os.getenv('GOOGLE_CREDENTIALS_FILE', str(BASE_DIR / 'google_credentials.json'))
+GOOGLE_SHEET_ID = os.getenv('GOOGLE_SHEET_ID', '')  # Your Google Sheet ID
+GOOGLE_SHEET_NAME = os.getenv('GOOGLE_SHEET_NAME', 'Sora Videos')  # Sheet tab name
+
+# Sora Video Generation Configuration
+SORA_DEFAULT_DURATION = int(os.getenv('SORA_DEFAULT_DURATION', '8'))  # 4, 8, or 12 seconds
+SORA_DEFAULT_ASPECT_RATIO = os.getenv('SORA_DEFAULT_ASPECT_RATIO', '9:16')  # 9:16 for TikTok/Instagram
+SORA_DEFAULT_QUALITY = os.getenv('SORA_DEFAULT_QUALITY', 'standard')  # standard or hd
+SORA_DELETE_LOCAL = os.getenv('SORA_DELETE_LOCAL', 'True') == 'True'  # Delete local after S3 upload
+SORA_AUTO_UPLOAD_S3 = os.getenv('SORA_AUTO_UPLOAD_S3', 'True') == 'True'  # Auto upload to S3
+SORA_AUTO_ADD_SHEETS = os.getenv('SORA_AUTO_ADD_SHEETS', 'True') == 'True'  # Auto add to Google Sheets
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

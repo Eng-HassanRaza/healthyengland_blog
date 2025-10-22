@@ -17,6 +17,17 @@ except ImportError:
     print("Error: OpenAI library not found. Please install it with: pip install openai")
     exit(1)
 
+# Try to import S3 uploader (Django integration)
+S3_AVAILABLE = False
+try:
+    import django
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'healthyengland.settings')
+    django.setup()
+    from sora.utils.s3_uploader import S3VideoUploader
+    S3_AVAILABLE = True
+except:
+    pass  # S3 not available (standalone mode)
+
 # Load environment variables from .env file if it exists
 try:
     from dotenv import load_dotenv
@@ -84,13 +95,13 @@ class SoraVideoGenerator:
                 print(f"Warning: Duration {duration}s not supported. Using {closest_duration}s instead.")
                 duration = closest_duration
             
-            # Map aspect ratio to size format
+            # Map aspect ratio to size format (Sora 2 supported formats)
             size_map = {
-                "16:9": "1280x720",
-                "9:16": "720x1280", 
-                "1:1": "1024x1024"
+                "16:9": "1280x720",   # Landscape
+                "9:16": "720x1280",   # Vertical (TikTok, Instagram Reels)
+                "1:1": "1024x1024"    # Square (approximation)
             }
-            size = size_map.get(aspect_ratio, "1280x720")
+            size = size_map.get(aspect_ratio, "720x1280")
             
             # Prepare the generation request
             generation_params = {
@@ -221,8 +232,27 @@ class SoraVideoGenerator:
         print(f"⏰ Timeout waiting for video completion after {max_wait_time} seconds")
         return self.get_video_status(video_id)
     
-    def download_video(self, video_id: str, filename: Optional[str] = None, variant: str = "video") -> str:
-        """Download video content from OpenAI."""
+    def download_video(
+        self, 
+        video_id: str, 
+        filename: Optional[str] = None, 
+        variant: str = "video",
+        upload_to_s3: bool = True,
+        delete_local_after_s3: bool = False
+    ) -> str:
+        """
+        Download video content from OpenAI and optionally upload to S3.
+        
+        Args:
+            video_id: OpenAI video ID
+            filename: Custom filename (optional)
+            variant: video, thumbnail, or preview
+            upload_to_s3: Whether to upload to S3 (if available)
+            delete_local_after_s3: Delete local file after successful S3 upload
+            
+        Returns:
+            Local file path (or S3 URL if local was deleted)
+        """
         try:
             if not filename:
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -240,6 +270,44 @@ class SoraVideoGenerator:
                 f.write(content.read())
             
             print(f"✅ Video downloaded successfully: {file_path}")
+            
+            # Upload to S3 if enabled and available
+            s3_url = None
+            if upload_to_s3 and S3_AVAILABLE:
+                try:
+                    print("\n📤 Uploading to S3...")
+                    s3_uploader = S3VideoUploader()
+                    
+                    # Prepare metadata for Google Sheets
+                    video_metadata = {
+                        'video_id': video_id,
+                        'prompt': None,  # Will be set by caller if available
+                        'duration': None  # Will be set by caller if available
+                    }
+                    
+                    result = s3_uploader.upload_video(
+                        str(file_path),
+                        delete_local=delete_local_after_s3,
+                        add_to_sheets=True,
+                        video_metadata=video_metadata
+                    )
+                    
+                    if result['success']:
+                        s3_url = result['s3_url']
+                        print(f"✅ S3 upload successful!")
+                        if delete_local_after_s3:
+                            print(f"ℹ️  Local file deleted, S3 URL: {s3_url}")
+                            return s3_url
+                    else:
+                        print(f"⚠️ S3 upload failed: {result.get('error')}")
+                        print(f"ℹ️  Keeping local copy: {file_path}")
+                        
+                except Exception as e:
+                    print(f"⚠️ S3 upload error: {e}")
+                    print(f"ℹ️  Keeping local copy: {file_path}")
+            elif upload_to_s3 and not S3_AVAILABLE:
+                print("ℹ️  S3 upload not available (Django not initialized or boto3 not installed)")
+            
             return str(file_path)
             
         except Exception as e:
