@@ -16,24 +16,10 @@ class Command(BaseCommand):
         parser.add_argument('--style', type=str, help='Optional style')
         parser.add_argument('--wait', action='store_true', help='Wait for completion and download')
         parser.add_argument('--download', action='store_true', help='Download video when complete')
-        parser.add_argument('--upload-tiktok', action='store_true', help='Upload to TikTok after generation')
-        parser.add_argument('--tiktok-caption', type=str, help='TikTok caption')
 
     def handle(self, *args, **options):
         prompt = options['prompt']
         generator = SoraVideoGenerator()
-
-        if options['upload_tiktok']:
-            result = generator.generate_and_upload_to_tiktok(
-                prompt=prompt,
-                duration=options['duration'],
-                aspect_ratio=options['aspect_ratio'],
-                style=options.get('style'),
-                tiktok_caption=options.get('tiktok_caption'),
-                wait_for_completion=options['wait'] or options['download']
-            )
-            self.stdout.write(self.style.SUCCESS(str(result)))
-            return
 
         result = generator.generate_video(
             prompt=prompt,
