@@ -110,12 +110,19 @@ class S3VideoUploader:
                 try:
                     from sora.utils.sheets_uploader import add_to_sheets as sheets_add
                     
-                    # Extract metadata
-                    title = local_file.name
+                    # Extract metadata - use SEO title if available, otherwise filename
+                    seo_title = video_metadata.get('seo_title') if video_metadata else None
+                    title = seo_title if seo_title else local_file.name
                     prompt = video_metadata.get('prompt') if video_metadata else None
                     duration = video_metadata.get('duration') if video_metadata else None
                     
-                    print("\n📊 Adding to Google Sheets...")
+                    print(f"\n📊 Adding to Google Sheets...")
+                    print(f"   Using title: {title}")
+                    if seo_title:
+                        print(f"   SEO title from blog post: {seo_title}")
+                    else:
+                        print(f"   Using filename as title: {local_file.name}")
+                    
                     sheets_result = sheets_add(
                         video_url=s3_url,
                         title=title,

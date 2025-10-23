@@ -246,7 +246,8 @@ class SoraVideoGenerator:
         filename: Optional[str] = None, 
         variant: str = "video",
         upload_to_s3: bool = True,
-        delete_local_after_s3: bool = False
+        delete_local_after_s3: bool = False,
+        video_metadata: Optional[Dict] = None
     ) -> str:
         """
         Download video content from OpenAI and optionally upload to S3.
@@ -257,6 +258,7 @@ class SoraVideoGenerator:
             variant: video, thumbnail, or preview
             upload_to_s3: Whether to upload to S3 (if available)
             delete_local_after_s3: Delete local file after successful S3 upload
+            video_metadata: Optional metadata dict for S3/Sheets upload
             
         Returns:
             Local file path (or S3 URL if local was deleted)
@@ -286,12 +288,14 @@ class SoraVideoGenerator:
                     print("\n📤 Uploading to S3...")
                     s3_uploader = S3VideoUploader()
                     
-                    # Prepare metadata for Google Sheets
-                    video_metadata = {
-                        'video_id': video_id,
-                        'prompt': None,  # Will be set by caller if available
-                        'duration': None  # Will be set by caller if available
-                    }
+                    # Use provided metadata or create default
+                    if video_metadata is None:
+                        video_metadata = {
+                            'video_id': video_id,
+                            'prompt': None,
+                            'duration': None,
+                            'seo_title': None
+                        }
                     
                     result = s3_uploader.upload_video(
                         str(file_path),

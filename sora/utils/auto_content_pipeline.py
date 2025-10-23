@@ -15,8 +15,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'healthyengland.settings')
 django.setup()
 
 from django.contrib.auth.models import User
-from content_generator import SkincareContentGenerator
-from generator import SoraVideoGenerator
+from sora.utils.content_generator import SkincareContentGenerator
+from sora.utils.generator import SoraVideoGenerator
 from blog.utils import check_duplicate_post, create_blog_post_from_content
 
 
@@ -104,12 +104,11 @@ class AutoContentPipeline:
         # Step 3: Generate video with Sora
         print("\nStep 3: Generating video with Sora...")
         video_prompt = video_prompt_data.get('prompt')
-        duration = video_prompt_data.get('duration', 12)
         
+        # Use .env settings for video generation (not content generator duration)
         video_result = self.video_generator.generate_video(
-            prompt=video_prompt,
-            duration=duration,
-            aspect_ratio='9:16'
+            prompt=video_prompt
+            # duration, quality, aspect_ratio will be loaded from .env settings
         )
         
         if video_result.get('error'):
@@ -135,10 +134,21 @@ class AutoContentPipeline:
         
         # Step 5: Download and upload to S3
         print("\nStep 5: Downloading and uploading to S3...")
+        
+        # Prepare video metadata with SEO title
+        from django.conf import settings
+        video_metadata = {
+            'video_id': video_id,
+            'prompt': video_prompt,
+            'duration': getattr(settings, 'SORA_DEFAULT_DURATION', 4),  # Use .env setting
+            'seo_title': content_data['blog_post']['title']  # Add SEO title
+        }
+        
         video_path = self.video_generator.download_video(
             video_id,
             upload_to_s3=True,
-            delete_local_after_s3=True
+            delete_local_after_s3=True,
+            video_metadata=video_metadata
         )
         
         if not video_path:

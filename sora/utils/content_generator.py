@@ -42,15 +42,19 @@ class SkincareContentGenerator:
 Generate a complete content package for a skincare blog and social media.
 
 CRITICAL VIDEO PROMPT REQUIREMENTS:
-- Maximum 12 seconds of content (STRICT LIMIT)
+- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
 - Single continuous shot (no scene changes)
 - Expert skincare professional talking directly to camera
 - Professional expert in relevant skincare environment (clinic, spa, or professional setup)
-- Include exact timing breakdown that totals ≤12 seconds
+- Include exact timing breakdown that totals EXACTLY 12 seconds
 - Specify: camera angle, lighting, setting, expert appearance
 - Expert should look like a real dermatologist/skincare professional
-- Visual, actionable skincare demonstration (not just talking)
+- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
 - Professional attire (lab coat, medical scrubs, or professional clothing)
+- STRONG HOOK in first 3-4 seconds to grab attention
+- NO third-party products, brands, or commercial items visible
+- Add European/English race character in the video
+- Complete the tip in 10 seconds
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words
@@ -102,7 +106,7 @@ Return ONLY valid JSON with this exact structure:
         if category:
             user_prompt += f"\nCategory must be: {category}"
         
-        user_prompt += "\n\nEnsure video prompt is DETAILED with exact timing that totals ≤12 seconds."
+        user_prompt += "\n\nIMPORTANT: Video prompt must be DETAILED with exact timing that totals EXACTLY 12 seconds. Focus on natural skincare tips, home remedies, lifestyle advice - NO product promotion. Include a strong hook in the first 3-4 seconds. Add European/English race character in the video. Complete the tip in 10 seconds."
         
         try:
             print("🤖 Generating content with OpenAI...")
@@ -154,10 +158,10 @@ Return ONLY valid JSON with this exact structure:
             print("⚠️ Video prompt missing required keys")
             return False
         
-        # Check duration constraint
+        # Check duration constraint - must be exactly 12 seconds
         duration = video_prompt.get('duration', 0)
-        if duration > 12:
-            print(f"⚠️ Video duration {duration}s exceeds 12 second limit")
+        if duration != 12:
+            print(f"⚠️ Video duration {duration}s must be exactly 12 seconds")
             return False
         
         # Check prompt detail
@@ -178,16 +182,18 @@ Return ONLY valid JSON with this exact structure:
         Returns:
             List of topic strings
         """
-        prompt = f"""Generate {count} unique, specific skincare content ideas.
+        prompt = f"""Generate {count} unique, specific skincare content ideas focused on NATURAL/HOME REMEDIES.
 
 Requirements:
-- Practical, actionable skincare tips
+- Natural skincare tips and home remedies
+- Lifestyle advice (drinking water, sleep, diet)
+- NO product promotion or brand mentions
 - Suitable for 12-second video demonstration
 - Engaging for social media
 - Mix across categories: Cleansing, Moisturizing, Anti-Aging, Acne, Sun Protection, etc.
 
 Return as JSON array of topic strings.
-Example: ["How to properly apply sunscreen for maximum protection", "Quick morning skincare routine for busy professionals"]"""
+Example: ["Drink 8 glasses of water daily for glowing skin", "Cold water face wash benefits in the morning", "Green tea bags for under-eye puffiness"]"""
 
         try:
             response = self.client.chat.completions.create(

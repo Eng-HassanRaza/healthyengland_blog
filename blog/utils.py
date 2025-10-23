@@ -83,20 +83,8 @@ def create_blog_post_from_content(
                 "error": f"Duplicate post with slug: {slug}"
             }
         
-        # Prepare content with embedded video
+        # Use content as-is (video will be displayed in template)
         content = blog_data.get('content', '')
-        
-        # Add video at the beginning if provided
-        if video_url:
-            video_embed = f"""
-<div class="video-container mb-4" style="position: relative; padding-bottom: 177.78%; height: 0; overflow: hidden; max-width: 100%; background: #000;">
-    <video controls style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" playsinline>
-        <source src="{video_url}" type="video/mp4">
-        Your browser does not support the video tag.
-    </video>
-</div>
-"""
-            content = video_embed + content
         
         # Create post with SEO fields
         post = Post.objects.create(

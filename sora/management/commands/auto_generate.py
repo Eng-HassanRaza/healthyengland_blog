@@ -11,22 +11,22 @@ from pathlib import Path
 # Add sora utils to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'utils'))
 
-from auto_content_pipeline import AutoContentPipeline
+from sora.utils.auto_content_pipeline import AutoContentPipeline
 
 
 class Command(BaseCommand):
-    help = 'Auto-generate health content: AI prompt → Sora video → Blog post (fully automated)'
+    help = 'Auto-generate skincare content: AI prompt → Sora video → Blog post (fully automated)'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--topic',
             type=str,
-            help='Optional: Specific health topic (will auto-generate if not provided)'
+            help='Optional: Specific skincare topic (will auto-generate if not provided)'
         )
         parser.add_argument(
             '--category',
-            choices=['Nutrition', 'Fitness', 'Mental Health', 'Wellness', 'Sleep'],
-            help='Optional: Filter by category'
+            choices=['Cleansing', 'Moisturizing', 'Anti-Aging', 'Acne', 'Sun Protection', 'Sensitive Skin', 'Oily Skin', 'Dry Skin'],
+            help='Optional: Filter by skincare category'
         )
         parser.add_argument(
             '--count',
