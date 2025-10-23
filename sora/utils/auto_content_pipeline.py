@@ -15,7 +15,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'healthyengland.settings')
 django.setup()
 
 from django.contrib.auth.models import User
-from content_generator import HealthContentGenerator
+from content_generator import SkincareContentGenerator
 from generator import SoraVideoGenerator
 from blog.utils import check_duplicate_post, create_blog_post_from_content
 
@@ -25,7 +25,7 @@ class AutoContentPipeline:
     
     def __init__(self):
         """Initialize pipeline."""
-        self.content_generator = HealthContentGenerator()
+        self.content_generator = SkincareContentGenerator()
         self.video_generator = SoraVideoGenerator()
         
         # Get default author (admin user)

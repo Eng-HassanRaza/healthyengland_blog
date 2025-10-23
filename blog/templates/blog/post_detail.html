@@ -62,6 +62,18 @@
                         </div>
                     </div>
 
+                    <!-- Video Content (if available) -->
+                    {% if post.video_url %}
+                    <div class="video-container mb-4">
+                        <div class="embed-responsive embed-responsive-16by9" style="max-width: 600px; margin: 0 auto;">
+                            <video controls class="embed-responsive-item" style="width: 100%; height: auto; border-radius: 8px;">
+                                <source src="{{ post.video_url }}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Post Content -->
                     <div class="post-content">
                         {{ post.content|safe }}
@@ -266,6 +278,19 @@
     
     .comment {
         border-left: 3px solid var(--primary-color);
+    }
+    
+    .video-container {
+        text-align: center;
+    }
+    
+    .video-container video {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .video-container video:hover {
+        transform: scale(1.02);
     }
 </style>
 {% endblock %}

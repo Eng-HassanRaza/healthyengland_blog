@@ -1,5 +1,5 @@
 """
-AI Content Generator for Health & Fitness
+AI Content Generator for Skincare
 Generates video prompts and blog posts using OpenAI API
 """
 
@@ -9,8 +9,8 @@ from typing import Dict, Optional
 from openai import OpenAI
 
 
-class HealthContentGenerator:
-    """Generate health & fitness content using OpenAI."""
+class SkincareContentGenerator:
+    """Generate skincare content using OpenAI."""
     
     def __init__(self, api_key: Optional[str] = None):
         """Initialize OpenAI client."""
@@ -31,42 +31,43 @@ class HealthContentGenerator:
         
         Args:
             topic: Specific topic (optional, will auto-generate if None)
-            category: Health category (Nutrition, Fitness, Mental Health, Wellness, Sleep)
+            category: Skincare category (Cleansing, Moisturizing, Anti-Aging, Acne, Sun Protection, etc.)
             
         Returns:
             Dict with video_prompt, blog_post, and metadata
         """
         
-        system_prompt = """You are an expert health & fitness content creator.
+        system_prompt = """You are an expert skincare professional and dermatologist.
 
-Generate a complete content package for a health & fitness blog and social media.
+Generate a complete content package for a skincare blog and social media.
 
 CRITICAL VIDEO PROMPT REQUIREMENTS:
 - Maximum 12 seconds of content (STRICT LIMIT)
 - Single continuous shot (no scene changes)
-- Expert demonstrating a specific health tip/technique
+- Expert skincare professional talking directly to camera
+- Professional expert in relevant skincare environment (clinic, spa, or professional setup)
 - Include exact timing breakdown that totals ≤12 seconds
 - Specify: camera angle, lighting, setting, expert appearance
-- Describe movements step-by-step with timing
-- Professional expert (specify gender, age range, clothing)
-- Visual, actionable demonstration (not just talking)
+- Expert should look like a real dermatologist/skincare professional
+- Visual, actionable skincare demonstration (not just talking)
+- Professional attire (lab coat, medical scrubs, or professional clothing)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words
-- SEO optimized for health & fitness niche
-- Actionable, practical advice
-- Expert tone but accessible
+- SEO optimized for skincare niche
+- Actionable, practical skincare advice
+- Expert dermatologist tone but accessible
 - Include introduction, main content sections, conclusion
-- Focus on one clear health benefit/tip
+- Focus on one clear skincare benefit/tip
 - Evidence-based when possible
 - Engaging headlines and subheadings
 
 SEO REQUIREMENTS:
-- Compelling title with keywords
+- Compelling title with skincare keywords
 - Meta description (150-160 characters)
-- 3-5 relevant tags
+- 3-5 relevant skincare tags
 - Focus keywords for search
-- Category (Nutrition, Fitness, Mental Health, Wellness, Sleep)
+- Category (Cleansing, Moisturizing, Anti-Aging, Acne, Sun Protection, etc.)
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -74,13 +75,13 @@ Return ONLY valid JSON with this exact structure:
     "prompt": "DETAILED visual description with timing breakdown",
     "duration": 12,
     "timing_breakdown": "Describe how 12 seconds are used",
-    "expert_type": "e.g., fitness coach, nutritionist"
+    "expert_type": "e.g., dermatologist, skincare specialist"
   },
   "blog_post": {
     "title": "SEO-optimized title",
     "content": "Full HTML formatted blog post",
     "excerpt": "150 character teaser",
-    "category": "One of: Nutrition, Fitness, Mental Health, Wellness, Sleep",
+    "category": "One of: Cleansing, Moisturizing, Anti-Aging, Acne, Sun Protection, etc.",
     "tags": ["tag1", "tag2", "tag3"],
     "meta_description": "150-160 char SEO description",
     "focus_keywords": ["keyword1", "keyword2"]
@@ -94,9 +95,9 @@ Return ONLY valid JSON with this exact structure:
 
         # Build user prompt
         if topic:
-            user_prompt = f"Generate a health & fitness content package about: {topic}"
+            user_prompt = f"Generate a skincare content package about: {topic}"
         else:
-            user_prompt = "Generate a unique, engaging health & fitness content package on any relevant topic."
+            user_prompt = "Generate a unique, engaging skincare content package on any relevant topic."
         
         if category:
             user_prompt += f"\nCategory must be: {category}"
@@ -177,22 +178,22 @@ Return ONLY valid JSON with this exact structure:
         Returns:
             List of topic strings
         """
-        prompt = f"""Generate {count} unique, specific health & fitness content ideas.
+        prompt = f"""Generate {count} unique, specific skincare content ideas.
 
 Requirements:
-- Practical, actionable tips
+- Practical, actionable skincare tips
 - Suitable for 12-second video demonstration
 - Engaging for social media
-- Mix across categories: Nutrition, Fitness, Mental Health, Wellness, Sleep
+- Mix across categories: Cleansing, Moisturizing, Anti-Aging, Acne, Sun Protection, etc.
 
 Return as JSON array of topic strings.
-Example: ["How to do a proper plank for core strength", "Quick morning stretches for flexibility"]"""
+Example: ["How to properly apply sunscreen for maximum protection", "Quick morning skincare routine for busy professionals"]"""
 
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "You are a health & fitness content strategist."},
+                    {"role": "system", "content": "You are a skincare content strategist."},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},
@@ -212,14 +213,14 @@ Example: ["How to do a proper plank for core strength", "Quick morning stretches
 
 def test_content_generator():
     """Test the content generator."""
-    generator = HealthContentGenerator()
+    generator = SkincareContentGenerator()
     
     # Test content generation
     print("\n" + "="*70)
     print("🧪 Testing Content Generator")
     print("="*70)
     
-    result = generator.generate_content_package(topic="breathing exercises for stress relief")
+    result = generator.generate_content_package(topic="proper sunscreen application technique")
     
     if result['success']:
         data = result['data']
