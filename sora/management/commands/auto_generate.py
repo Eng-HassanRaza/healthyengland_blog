@@ -15,24 +15,29 @@ from sora.utils.auto_content_pipeline import AutoContentPipeline
 
 
 class Command(BaseCommand):
-    help = 'Auto-generate skincare content: AI prompt → Sora video → Blog post (fully automated)'
+    help = 'Auto-generate diverse health content: AI prompt → Sora video → Blog post (fully automated with diversity optimization)'
 
     def add_arguments(self, parser):
         parser.add_argument(
             '--topic',
             type=str,
-            help='Optional: Specific skincare topic (will auto-generate if not provided)'
+            help='Optional: Specific health topic (will auto-generate if not provided)'
         )
         parser.add_argument(
             '--category',
-            choices=['Cleansing', 'Moisturizing', 'Anti-Aging', 'Acne', 'Sun Protection', 'Sensitive Skin', 'Oily Skin', 'Dry Skin'],
-            help='Optional: Filter by skincare category'
+            choices=['Nutrition', 'Fitness', 'Mental Health', 'Sleep', 'Hydration', 'Skincare', 'Wellness', 'Digestive Health', 'Immune System', 'Weight Management'],
+            help='Optional: Filter by health category'
         )
         parser.add_argument(
             '--count',
             type=int,
             default=1,
             help='Number of content pieces to generate (default: 1)'
+        )
+        parser.add_argument(
+            '--test-mode',
+            action='store_true',
+            help='Test mode - skip expensive video generation, only test content creation'
         )
 
     def handle(self, *args, **options):
@@ -48,17 +53,31 @@ class Command(BaseCommand):
         topic = options.get('topic')
         category = options.get('category')
         count = options.get('count', 1)
+        test_mode = options.get('test_mode', False)
         
         self.stdout.write("\n" + "="*70)
-        self.stdout.write("🤖 FULLY AUTOMATED CONTENT GENERATION")
+        self.stdout.write("🤖 DIVERSE HEALTH CONTENT GENERATION")
         self.stdout.write("="*70)
-        self.stdout.write("This will:")
-        self.stdout.write("  1. Generate AI content (video prompt + blog post)")
-        self.stdout.write("  2. Create video with Sora")
-        self.stdout.write("  3. Upload video to S3")
-        self.stdout.write("  4. Add to Google Sheets")
-        self.stdout.write("  5. Publish blog post with embedded video")
-        self.stdout.write("="*70)
+        if test_mode:
+            self.stdout.write("🧪 TEST MODE - NO EXPENSIVE VIDEO GENERATION")
+            self.stdout.write("="*70)
+            self.stdout.write("This will:")
+            self.stdout.write("  1. Generate diverse AI content (video prompt + blog post)")
+            self.stdout.write("  2. Check for content similarity and diversity")
+            self.stdout.write("  3. Test video prompt processing (NO Sora API call)")
+            self.stdout.write("  4. Validate 12-second video optimization")
+            self.stdout.write("  5. Track content for diversity analysis")
+            self.stdout.write("="*70)
+        else:
+            self.stdout.write("This will:")
+            self.stdout.write("  1. Generate diverse AI content (video prompt + blog post)")
+            self.stdout.write("  2. Check for content similarity and diversity")
+            self.stdout.write("  3. Create video with Sora")
+            self.stdout.write("  4. Upload video to S3")
+            self.stdout.write("  5. Add to Google Sheets")
+            self.stdout.write("  6. Publish blog post with embedded video")
+            self.stdout.write("  7. Track content for diversity optimization")
+            self.stdout.write("="*70)
         
         if topic:
             self.stdout.write(f"Topic: {topic}")
@@ -90,21 +109,33 @@ class Command(BaseCommand):
                 result = pipeline.run(
                     topic=topic,
                     category=category,
-                    publish_immediately=True
+                    publish_immediately=True,
+                    test_mode=test_mode
                 )
                 
                 if result['success']:
                     success_count += 1
                     results.append(result)
                     
-                    post = result['post']
-                    self.stdout.write(self.style.SUCCESS(
-                        f"\n✅ Content created successfully!"
-                    ))
-                    self.stdout.write(f"   Title: {post.title}")
-                    self.stdout.write(f"   URL: https://healthyengland.com{post.get_absolute_url()}")
-                    self.stdout.write(f"   Category: {post.category.name}")
-                    self.stdout.write(f"   Video: {result.get('video_url', 'N/A')}")
+                    if result.get('test_mode'):
+                        # Test mode - no post created
+                        self.stdout.write(self.style.SUCCESS(
+                            f"\n✅ Test completed successfully!"
+                        ))
+                        self.stdout.write(f"   Title: {result['content_data']['blog_post']['title']}")
+                        self.stdout.write(f"   Category: {result['content_data']['blog_post']['category']}")
+                        self.stdout.write(f"   Video Prompt: {result.get('video_prompt', 'N/A')[:50]}...")
+                        self.stdout.write(f"   Message: {result.get('message', 'Test completed')}")
+                    else:
+                        # Regular mode - post created
+                        post = result['post']
+                        self.stdout.write(self.style.SUCCESS(
+                            f"\n✅ Content created successfully!"
+                        ))
+                        self.stdout.write(f"   Title: {post.title}")
+                        self.stdout.write(f"   URL: https://healthyengland.com{post.get_absolute_url()}")
+                        self.stdout.write(f"   Category: {post.category.name}")
+                        self.stdout.write(f"   Video: {result.get('video_url', 'N/A')}")
                     
                 else:
                     failed_count += 1
