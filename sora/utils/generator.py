@@ -66,9 +66,9 @@ class SoraVideoGenerator:
     def generate_video(
         self,
         prompt: str,
-        duration: int = 4,
-        quality: str = "standard",
-        aspect_ratio: str = "16:9",
+        duration: Optional[int] = None,
+        quality: Optional[str] = None,
+        aspect_ratio: Optional[str] = None,
         style: Optional[str] = None,
         save_metadata: bool = True
     ) -> Dict[str, Any]:
@@ -77,9 +77,9 @@ class SoraVideoGenerator:
         
         Args:
             prompt: Text description of the video to generate
-            duration: Video duration in seconds (4, 8, or 12)
-            quality: Video quality ("standard" or "hd")
-            aspect_ratio: Video aspect ratio ("16:9", "9:16", "1:1")
+            duration: Video duration in seconds (4, 8, or 12) - uses .env if None
+            quality: Video quality ("standard" or "hd") - uses .env if None
+            aspect_ratio: Video aspect ratio ("16:9", "9:16", "1:1") - uses .env if None
             style: Optional style description
             save_metadata: Whether to save generation metadata
             
@@ -87,6 +87,14 @@ class SoraVideoGenerator:
             Dictionary containing video ID and metadata
         """
         try:
+            # Load settings from Django settings (which loads from .env)
+            from django.conf import settings
+            
+            # Use provided values or fall back to settings
+            duration = duration or getattr(settings, 'SORA_DEFAULT_DURATION', 8)
+            quality = quality or getattr(settings, 'SORA_DEFAULT_QUALITY', 'standard')
+            aspect_ratio = aspect_ratio or getattr(settings, 'SORA_DEFAULT_ASPECT_RATIO', '9:16')
+            
             # Validate duration (Sora 2 only supports 4, 8, 12 seconds)
             valid_durations = [4, 8, 12]
             if duration not in valid_durations:
