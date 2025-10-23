@@ -19,7 +19,7 @@ class HealthContentGenerator:
             raise ValueError("OpenAI API key required")
         
         self.client = OpenAI(api_key=self.api_key)
-        self.model = "gpt-4o"
+        self.model = "gpt-4o-mini"
     
     def generate_content_package(
         self,
