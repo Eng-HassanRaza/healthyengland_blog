@@ -12,19 +12,23 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
-    list_display = ['title', 'author', 'category', 'status', 'published_at', 'views', 'likes']
-    list_filter = ['status', 'category', 'created_at', 'published_at']
-    search_fields = ['title', 'content']
+    list_display = ['title', 'author', 'category', 'status', 'is_ai_generated', 'published_at', 'views', 'likes']
+    list_filter = ['status', 'category', 'is_ai_generated', 'created_at', 'published_at']
+    search_fields = ['title', 'content', 'meta_description']
     prepopulated_fields = {'slug': ('title',)}
     date_hierarchy = 'published_at'
     ordering = ['-published_at']
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('title', 'slug', 'author', 'category', 'status')
+            'fields': ('title', 'slug', 'author', 'category', 'status', 'is_ai_generated')
         }),
         ('Content', {
-            'fields': ('content', 'excerpt', 'featured_image')
+            'fields': ('content', 'excerpt', 'featured_image', 'video_url')
+        }),
+        ('SEO', {
+            'fields': ('meta_description', 'focus_keywords'),
+            'classes': ('collapse',)
         }),
         ('Metadata', {
             'fields': ('tags', 'views', 'likes'),

@@ -184,3 +184,6 @@ google_credentials.json
 
 # Generated Videos
 generated_videos/
+
+*.md
+!README.md
