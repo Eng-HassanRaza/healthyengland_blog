@@ -62,19 +62,28 @@ class AutoContentPipeline:
             
             # Create optimization prompt
             optimization_prompt = f"""
-You are a video content optimizer. Your task is to shorten this video prompt to fit exactly in a 12-second video.
+You are a video content optimizer. Your task is to shorten this video prompt to fit EXACTLY in a 12-second video.
 
 ORIGINAL PROMPT:
 {prompt}
 
-REQUIREMENTS:
-- Maximum 120 characters total
-- Keep the essential message
-- Make it punchy and engaging
-- Ensure it can be spoken in 10 seconds
-- Maintain the expert tone
-- Keep the hook and tip structure
+CRITICAL REQUIREMENTS:
+- Maximum 80 characters total (STRICT LIMIT)
+- Must be spoken in 8-10 seconds maximum (LEAVE 2-4 seconds buffer)
+- Keep ONLY the most essential message
+- Make it extremely punchy and concise
+- Use short, simple words
+- Remove all unnecessary words
+- Keep the hook and tip structure but make them VERY short
 - ONLY use European/English/African race characters (NO Asian, Hispanic, or other ethnicities)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
+- MUST be a practical health/fitness tip (NOT motivational content)
+
+EXAMPLES OF GOOD 12-SECOND HEALTH/FITNESS TIPS:
+- "Expert says: 'Low energy? Drink lemon water for instant boost.' First frame shows 'Low energy?' as large text overlay. Start with 2-second silence before speech."
+- "Expert says: 'Can't sleep? Try chamomile tea before bed.' First frame shows 'Can't sleep?' as large text overlay. Start with 2-second silence before speech."
+- "Expert says: 'Need focus? Take a 5-minute walk outside.' First frame shows 'Need focus?' as large text overlay. Start with 2-second silence before speech."
 
 Return ONLY the optimized prompt, nothing else.
 """
@@ -91,11 +100,12 @@ Return ONLY the optimized prompt, nothing else.
             
             optimized = response.choices[0].message.content.strip()
             
-            # Validate the optimized prompt
-            if len(optimized) <= 120 and len(optimized) >= 30:
+            # Validate the optimized prompt - MUCH STRICTER for 12-second videos
+            if len(optimized) <= 80 and len(optimized) >= 20:
+                print(f"   ✅ AI optimization successful: {len(optimized)} chars (within 80 char limit)")
                 return optimized
             else:
-                print(f"   ⚠️ AI optimization result too long/short: {len(optimized)} chars")
+                print(f"   ⚠️ AI optimization result too long/short: {len(optimized)} chars (must be ≤80)")
                 return None
                 
         except Exception as e:
@@ -129,32 +139,32 @@ Return ONLY the optimized prompt, nothing else.
                         hook = sentences[0].strip()
                         tip = sentences[1].strip()
                         
-                        # Shorten tip if too long
-                        if len(tip) > 50:
+                        # Shorten tip if too long - MUCH MORE AGGRESSIVE for 12-second videos
+                        if len(tip) > 30:
                             words = tip.split()
-                            tip = ' '.join(words[:8])  # Take first 8 words
+                            tip = ' '.join(words[:4])  # Take first 4 words only
                         
                         optimized = f"Expert says: '{hook}. {tip}.'"
                         
-                        # Ensure it's within limits
-                        if len(optimized) <= 120:
+                        # Ensure it's within STRICT 80 character limit for 12-second videos
+                        if len(optimized) <= 80:
                             return optimized
                         else:
-                            # Further shorten
-                            hook_words = hook.split()[:4]  # First 4 words of hook
-                            tip_words = tip.split()[:6]   # First 6 words of tip
+                            # Much more aggressive shortening for 12-second videos
+                            hook_words = hook.split()[:3]  # First 3 words of hook
+                            tip_words = tip.split()[:3]    # First 3 words of tip
                             return f"Expert says: '{' '.join(hook_words)}. {' '.join(tip_words)}.'"
                     else:
-                        # Single sentence - just truncate intelligently
+                        # Single sentence - MUCH MORE AGGRESSIVE truncation for 12-second videos
                         words = content.split()
-                        if len(words) > 12:
-                            return f"Expert says: '{' '.join(words[:12])}...'"
+                        if len(words) > 8:  # Much shorter
+                            return f"Expert says: '{' '.join(words[:8])}...'"
                         else:
                             return f"Expert says: '{content}'"
                 else:
-                    # No quotes found, just truncate
-                    if len(prompt) > 120:
-                        return prompt[:117] + "..."
+                    # No quotes found, MUCH MORE AGGRESSIVE truncation for 12-second videos
+                    if len(prompt) > 80:
+                        return prompt[:77] + "..."
                     else:
                         return prompt
             elif "'hook':" in prompt and "'main_tip':" in prompt:
@@ -168,51 +178,52 @@ Return ONLY the optimized prompt, nothing else.
                         hook = hook_match.group(1)
                         tip = tip_match.group(1)
                         
-                        # Shorten tip if too long
-                        if len(tip) > 60:
+                        # Shorten tip if too long - MUCH MORE AGGRESSIVE for 12-second videos
+                        if len(tip) > 30:
                             words = tip.split()
-                            tip = ' '.join(words[:10])  # Take first 10 words
+                            tip = ' '.join(words[:4])  # Take first 4 words only
                         
                         optimized = f"Expert says: '{hook} {tip}'"
                         
-                        # Ensure it's within limits
-                        if len(optimized) <= 120:
+                        # Ensure it's within STRICT 80 character limit for 12-second videos
+                        if len(optimized) <= 80:
                             return optimized
                         else:
-                            # Further shorten
-                            hook_words = hook.split()[:5]  # First 5 words of hook
-                            tip_words = tip.split()[:8]    # First 8 words of tip
+                            # Much more aggressive shortening for 12-second videos
+                            hook_words = hook.split()[:3]  # First 3 words of hook
+                            tip_words = tip.split()[:3]    # First 3 words of tip
                             return f"Expert says: '{' '.join(hook_words)} {' '.join(tip_words)}'"
                     else:
-                        # Fallback to simple truncation
-                        if len(prompt) > 120:
-                            return prompt[:117] + "..."
+                        # Fallback to MUCH MORE AGGRESSIVE truncation for 12-second videos
+                        if len(prompt) > 80:
+                            return prompt[:77] + "..."
                         else:
                             return prompt
                 except:
-                    # Fallback to simple truncation
-                    if len(prompt) > 120:
-                        return prompt[:117] + "..."
+                    # Fallback to MUCH MORE AGGRESSIVE truncation for 12-second videos
+                    if len(prompt) > 80:
+                        return prompt[:77] + "..."
                     else:
                         return prompt
             else:
-                # No recognized format, just truncate
-                if len(prompt) > 120:
-                    return prompt[:117] + "..."
+                # No recognized format, MUCH MORE AGGRESSIVE truncation for 12-second videos
+                if len(prompt) > 80:
+                    return prompt[:77] + "..."
                 else:
                     return prompt
                     
         except Exception as e:
             print(f"   ⚠️ Fallback optimization failed: {e}")
-            # Last resort - simple truncation
-            return prompt[:120] + "..." if len(prompt) > 120 else prompt
+            # Last resort - MUCH MORE AGGRESSIVE truncation for 12-second videos
+            return prompt[:80] + "..." if len(prompt) > 80 else prompt
     
     def run(
         self,
         topic: Optional[str] = None,
         category: Optional[str] = None,
         publish_immediately: bool = True,
-        test_mode: bool = False
+        test_mode: bool = False,
+        no_sheets: bool = False
     ) -> Dict:
         """
         Run complete content generation pipeline.
@@ -355,7 +366,7 @@ Return ONLY the optimized prompt, nothing else.
             print("\nStep 3: Testing video prompt processing (NO Sora API call)...")
             # Test video prompt processing without expensive API call
             video_prompt_data = content_data.get('video_prompt', {})
-            video_prompt_raw = video_prompt_data.get('content') or video_prompt_data.get('prompt')
+            video_prompt_raw = video_prompt_data.get('content') or video_prompt_data.get('prompt') or video_prompt_data.get('script') or video_prompt_data.get('speech') or video_prompt_data
             
             if video_prompt_raw:
                 # Test prompt conversion (without sending to Sora)
@@ -365,16 +376,67 @@ Return ONLY the optimized prompt, nothing else.
                         for item in video_prompt_raw
                     ])
                 elif isinstance(video_prompt_raw, dict):
-                    if 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
+                    if 'script' in video_prompt_raw and isinstance(video_prompt_raw['script'], list):
+                        # Handle new script format with frames and text overlays
+                        script_frames = video_prompt_raw['script']
+                        if len(script_frames) >= 2:
+                            frame1_text = script_frames[0].get('text_overlay', '')
+                            frame2_text = script_frames[1].get('text_overlay', '')
+                            video_prompt = f"Expert says: '{frame1_text} {frame2_text}'"
+                        else:
+                            video_prompt = str(video_prompt_raw)
+                    elif 'content' in video_prompt_raw and 'hook' in video_prompt_raw['content'] and 'tip' in video_prompt_raw['content']:
+                        # Handle new content format with hook and tip
+                        hook_data = video_prompt_raw['content']['hook']
+                        tip_data = video_prompt_raw['content']['tip']
+                        hook_text = hook_data.get('text', hook_data.get('speech', ''))
+                        tip_text = tip_data.get('speech', tip_data.get('text', ''))
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
+                    elif 'speech' in video_prompt_raw and 'hook' in video_prompt_raw['speech'] and 'tip' in video_prompt_raw['speech']:
+                        # Handle new speech format
+                        hook_text = video_prompt_raw['speech']['hook']
+                        tip_text = video_prompt_raw['speech']['tip']
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
+                    elif 'speech' in video_prompt_raw and isinstance(video_prompt_raw['speech'], dict) and 'hook' in video_prompt_raw['speech'] and 'tip' in video_prompt_raw['speech']:
+                        # Handle speech format with hook and tip as strings
+                        hook_text = video_prompt_raw['speech']['hook']
+                        tip_text = video_prompt_raw['speech']['tip']
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
+                    elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
+                        # Handle direct hook and tip format
+                        hook_data = video_prompt_raw['hook']
+                        tip_data = video_prompt_raw['tip']
+                        if isinstance(hook_data, dict):
+                            hook_text = hook_data.get('text', hook_data.get('speech', ''))
+                        else:
+                            hook_text = str(hook_data)
+                        if isinstance(tip_data, dict):
+                            tip_text = tip_data.get('text', tip_data.get('speech', ''))
+                        else:
+                            tip_text = str(tip_data)
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
+                    elif 'content' in video_prompt_raw and 'hook' in video_prompt_raw['content'] and 'tip' in video_prompt_raw['content']:
+                        # Handle new content format with hook and tip
+                        hook_data = video_prompt_raw['content']['hook']
+                        tip_data = video_prompt_raw['content']['tip']
+                        hook_text = hook_data.get('script', hook_data.get('text', ''))
+                        tip_text = tip_data.get('script', tip_data.get('text', ''))
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
+                    elif 'hook' in video_prompt_raw and 'mainTip' in video_prompt_raw:
+                        # Handle new script format
+                        hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
+                        tip_text = video_prompt_raw['mainTip'].get('text', video_prompt_raw['mainTip']) if isinstance(video_prompt_raw['mainTip'], dict) else video_prompt_raw['mainTip']
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
+                    elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
                         hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
                         tip_text = video_prompt_raw['tip'].get('text', video_prompt_raw['tip']) if isinstance(video_prompt_raw['tip'], dict) else video_prompt_raw['tip']
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}'"
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
                     elif 'spoken_content' in video_prompt_raw:
                         # Handle spoken_content format
                         spoken = video_prompt_raw['spoken_content']
                         hook_text = spoken.get('hook', '')
                         tip_text = spoken.get('tip', '')
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}'"
+                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
                     elif 'timing_breakdown' in video_prompt_raw:
                         # Handle timing_breakdown format
                         timing = video_prompt_raw['timing_breakdown']
@@ -395,22 +457,22 @@ Return ONLY the optimized prompt, nothing else.
                 print(f"   Video Prompt Length: {len(video_prompt)} chars")
                 print(f"   Video Prompt Preview: {video_prompt[:100]}...")
                 
-                # Check if prompt is appropriate for 12-second video
-                if len(video_prompt) < 50:
+                # Check if prompt is appropriate for 12-second video - MUCH STRICTER
+                if len(video_prompt) < 20:
                     print("   ⚠️ Video prompt might be too short")
-                elif len(video_prompt) > 150:
-                    print("   ⚠️ Video prompt might be too long for 12 seconds")
+                elif len(video_prompt) > 80:
+                    print("   ⚠️ Video prompt is TOO LONG for 12 seconds (must be ≤80 chars)")
                     print("   🤖 Optimizing prompt with AI to fit 12-second criteria...")
                     
                     # Use AI to optimize the prompt for 12-second video
                     optimized_prompt = self._optimize_video_prompt(video_prompt)
-                    if optimized_prompt and len(optimized_prompt) <= 150:
+                    if optimized_prompt and len(optimized_prompt) <= 80:
                         video_prompt = optimized_prompt
-                        print(f"   ✅ Prompt optimized: {len(video_prompt)} chars")
-                        print(f"   📝 Optimized content: {video_prompt[:100]}...")
+                        print(f"   ✅ Prompt optimized: {len(video_prompt)} chars (within 80 char limit)")
+                        print(f"   📝 Optimized content: {video_prompt}")
                     else:
-                        print("   ⚠️ Could not optimize prompt - using truncated version")
-                        video_prompt = video_prompt[:150] + "..."
+                        print("   ⚠️ Could not optimize prompt - using aggressive truncation")
+                        video_prompt = video_prompt[:80] + "..."
                 else:
                     print("   ✅ Video prompt length looks good for 12-second video")
                 
@@ -436,7 +498,7 @@ Return ONLY the optimized prompt, nothing else.
         
         # Regular mode: Generate video with Sora
         print("\nStep 3: Generating video with Sora...")
-        video_prompt_raw = video_prompt_data.get('content') or video_prompt_data.get('prompt')
+        video_prompt_raw = video_prompt_data.get('content') or video_prompt_data.get('prompt') or video_prompt_data.get('script') or video_prompt_data.get('speech') or video_prompt_data
         
         if not video_prompt_raw:
             return {
@@ -453,10 +515,49 @@ Return ONLY the optimized prompt, nothing else.
             ])
         elif isinstance(video_prompt_raw, dict):
             # Handle dictionary format - extract key content
-            if 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
+            if 'script' in video_prompt_raw and isinstance(video_prompt_raw['script'], list):
+                # Handle new script format with frames and text overlays
+                script_frames = video_prompt_raw['script']
+                if len(script_frames) >= 2:
+                    frame1_text = script_frames[0].get('text_overlay', '')
+                    frame2_text = script_frames[1].get('text_overlay', '')
+                    video_prompt = f"Expert says: '{frame1_text} {frame2_text}'"
+                else:
+                    video_prompt = str(video_prompt_raw)
+            elif 'content' in video_prompt_raw and 'hook' in video_prompt_raw['content'] and 'tip' in video_prompt_raw['content']:
+                # Handle new content format with hook and tip
+                hook_data = video_prompt_raw['content']['hook']
+                tip_data = video_prompt_raw['content']['tip']
+                hook_text = hook_data.get('text', hook_data.get('speech', ''))
+                tip_text = tip_data.get('speech', tip_data.get('text', ''))
+                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
+            elif 'speech' in video_prompt_raw and 'hook' in video_prompt_raw['speech'] and 'tip' in video_prompt_raw['speech']:
+                # Handle new speech format
+                hook_text = video_prompt_raw['speech']['hook']
+                tip_text = video_prompt_raw['speech']['tip']
+                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
+            elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
+                # Handle direct hook and tip format
+                hook_data = video_prompt_raw['hook']
+                tip_data = video_prompt_raw['tip']
+                if isinstance(hook_data, dict):
+                    hook_text = hook_data.get('text', hook_data.get('speech', ''))
+                else:
+                    hook_text = str(hook_data)
+                if isinstance(tip_data, dict):
+                    tip_text = tip_data.get('text', tip_data.get('speech', ''))
+                else:
+                    tip_text = str(tip_data)
+                video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen."
+            elif 'hook' in video_prompt_raw and 'mainTip' in video_prompt_raw:
+                # Handle new script format
+                hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
+                tip_text = video_prompt_raw['mainTip'].get('text', video_prompt_raw['mainTip']) if isinstance(video_prompt_raw['mainTip'], dict) else video_prompt_raw['mainTip']
+                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
+            elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
                 hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
                 tip_text = video_prompt_raw['tip'].get('text', video_prompt_raw['tip']) if isinstance(video_prompt_raw['tip'], dict) else video_prompt_raw['tip']
-                video_prompt = f"Expert says: '{hook_text} {tip_text}'"
+                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
             elif 'content' in video_prompt_raw and isinstance(video_prompt_raw['content'], list):
                 # Handle content array format
                 video_prompt = " ".join([
@@ -468,16 +569,16 @@ Return ONLY the optimized prompt, nothing else.
         else:
             video_prompt = str(video_prompt_raw)
         
-        # Ensure prompt is concise for 12-second video
-        if len(video_prompt) > 150:
+        # Ensure prompt is concise for 12-second video - MUCH STRICTER
+        if len(video_prompt) > 80:
             print("   🤖 Optimizing prompt with AI to fit 12-second criteria...")
             optimized_prompt = self._optimize_video_prompt(video_prompt)
-            if optimized_prompt and len(optimized_prompt) <= 150:
+            if optimized_prompt and len(optimized_prompt) <= 80:
                 video_prompt = optimized_prompt
-                print(f"   ✅ Prompt optimized: {len(video_prompt)} chars")
+                print(f"   ✅ Prompt optimized: {len(video_prompt)} chars (within 80 char limit)")
             else:
-                print("   ⚠️ Could not optimize prompt - using truncated version")
-                video_prompt = video_prompt[:150] + "..."
+                print("   ⚠️ Could not optimize prompt - using aggressive truncation")
+                video_prompt = video_prompt[:80] + "..."
         
         # Use .env settings for video generation (not content generator duration)
         video_result = self.video_generator.generate_video(
@@ -522,7 +623,8 @@ Return ONLY the optimized prompt, nothing else.
             video_id,
             upload_to_s3=True,
             delete_local_after_s3=True,
-            video_metadata=video_metadata
+            video_metadata=video_metadata,
+            add_to_sheets=not no_sheets
         )
         
         if not video_path:

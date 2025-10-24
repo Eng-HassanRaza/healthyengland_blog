@@ -39,6 +39,11 @@ class Command(BaseCommand):
             action='store_true',
             help='Test mode - skip expensive video generation, only test content creation'
         )
+        parser.add_argument(
+            '--no-sheets',
+            action='store_true',
+            help='Skip Google Sheets integration (useful for testing)'
+        )
 
     def handle(self, *args, **options):
         """
@@ -54,6 +59,7 @@ class Command(BaseCommand):
         category = options.get('category')
         count = options.get('count', 1)
         test_mode = options.get('test_mode', False)
+        no_sheets = options.get('no_sheets', False)
         
         self.stdout.write("\n" + "="*70)
         self.stdout.write("🤖 DIVERSE HEALTH CONTENT GENERATION")
@@ -74,9 +80,14 @@ class Command(BaseCommand):
             self.stdout.write("  2. Check for content similarity and diversity")
             self.stdout.write("  3. Create video with Sora")
             self.stdout.write("  4. Upload video to S3")
-            self.stdout.write("  5. Add to Google Sheets")
-            self.stdout.write("  6. Publish blog post with embedded video")
-            self.stdout.write("  7. Track content for diversity optimization")
+            if no_sheets:
+                self.stdout.write("  5. Skip Google Sheets integration (--no-sheets flag)")
+                self.stdout.write("  6. Publish blog post with embedded video")
+                self.stdout.write("  7. Track content for diversity optimization")
+            else:
+                self.stdout.write("  5. Add to Google Sheets")
+                self.stdout.write("  6. Publish blog post with embedded video")
+                self.stdout.write("  7. Track content for diversity optimization")
             self.stdout.write("="*70)
         
         if topic:
@@ -110,7 +121,8 @@ class Command(BaseCommand):
                     topic=topic,
                     category=category,
                     publish_immediately=True,
-                    test_mode=test_mode
+                    test_mode=test_mode,
+                    no_sheets=no_sheets
                 )
                 
                 if result['success']:

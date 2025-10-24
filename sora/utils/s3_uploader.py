@@ -140,6 +140,17 @@ class S3VideoUploader:
                 except Exception as e:
                     print(f"⚠️ Could not add to Google Sheets: {e}")
                     result['sheets_error'] = str(e)
+            else:
+                # Print URL and title instead of adding to sheets
+                seo_title = video_metadata.get('seo_title') if video_metadata else None
+                title = seo_title if seo_title else local_file.name
+                
+                print(f"\n📋 Video Information (No Google Sheets):")
+                print(f"   S3 URL: {s3_url}")
+                print(f"   Title: {title}")
+                if seo_title:
+                    print(f"   SEO Title: {seo_title}")
+                print(f"   File Size: {file_size / (1024*1024):.2f} MB")
             
             return result
             

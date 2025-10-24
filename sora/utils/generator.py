@@ -247,7 +247,8 @@ class SoraVideoGenerator:
         variant: str = "video",
         upload_to_s3: bool = True,
         delete_local_after_s3: bool = False,
-        video_metadata: Optional[Dict] = None
+        video_metadata: Optional[Dict] = None,
+        add_to_sheets: bool = True
     ) -> str:
         """
         Download video content from OpenAI and optionally upload to S3.
@@ -300,7 +301,7 @@ class SoraVideoGenerator:
                     result = s3_uploader.upload_video(
                         str(file_path),
                         delete_local=delete_local_after_s3,
-                        add_to_sheets=True,
+                        add_to_sheets=add_to_sheets,
                         video_metadata=video_metadata
                     )
                     

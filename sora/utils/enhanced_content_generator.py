@@ -88,6 +88,20 @@ class EnhancedContentGenerator:
                 'unique_id': str(uuid.uuid4())[:8]
             }
             
+            # Convert camelCase to snake_case for consistency
+            if 'videoPrompt' in content_data:
+                content_data['video_prompt'] = content_data.pop('videoPrompt')
+            if 'blogPost' in content_data:
+                content_data['blog_post'] = content_data.pop('blogPost')
+            if 'video' in content_data:
+                content_data['video_prompt'] = content_data.pop('video')
+            if 'content_package' in content_data:
+                content_data['blog_post'] = content_data.pop('content_package')
+            
+            # Ensure category field exists in blog_post
+            if 'blog_post' in content_data and 'category' not in content_data['blog_post']:
+                content_data['blog_post']['category'] = category
+            
             print("✅ Diverse content package generated!")
             
             # Debug: Print content structure
@@ -119,227 +133,187 @@ class EnhancedContentGenerator:
         """Generate system prompt based on health category."""
         
         category_prompts = {
-            'Nutrition': """You are an expert nutritionist and registered dietitian.
+            'Nutrition': """You are a nutrition expert. Create a 12-second video + blog post about healthy eating.
 
-Generate a complete content package for a nutrition and healthy eating blog.
-
-CRITICAL VIDEO PROMPT REQUIREMENTS:
-- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
-- Single continuous shot (no scene changes)
-- Expert nutritionist/dietitian talking directly to camera
-- Professional expert in relevant nutrition environment (kitchen, clinic, or professional setup)
-- Include exact timing breakdown that totals EXACTLY 12 seconds
-- Specify: camera angle, lighting, setting, expert appearance
-- Expert should look like a real nutritionist/dietitian
-- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
-- Professional attire (lab coat, medical scrubs, or professional clothing)
-- STRONG HOOK in first 3-4 seconds to grab attention
-- NO third-party products, brands, or commercial items visible
-- Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities)
-- Complete the tip in 10 seconds
-- KEEP SPEECH SHORT AND CONCISE - MAXIMUM 2-3 SENTENCES TOTAL
-- NO LONG EXPLANATIONS - JUST THE ESSENTIAL TIP
+VIDEO REQUIREMENTS:
+- 12 seconds total (no more, no less)
+- Expert talking to camera in kitchen or garden
+- Natural remedies only (NO products, technology, or devices)
+- Hook: 3-4 seconds, Tip: 8-9 seconds
+- Character: European/English/African only
+- Attire: Chef apron or casual professional (NOT medical scrubs)
+- Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
-- 800-1500 words
-- SEO optimized for nutrition and healthy eating niche
-- Actionable, practical nutrition advice
-- Expert nutritionist tone but accessible
-- Include introduction, main content sections, conclusion
-- Focus on one clear nutrition benefit/tip
-- Evidence-based when possible
-- Engaging headlines and subheadings
+- 800-1500 words about nutrition
+- Category: Nutrition
+- SEO optimized with keywords
+- Natural remedies focus
+- Include title, meta description, tags
 
-SEO REQUIREMENTS:
-- Compelling title with nutrition keywords
-- Meta description (150-160 characters)
-- 3-5 relevant nutrition tags
-- Focus keywords for search
-- Category (Nutrition, Healthy Eating, Meal Planning, etc.)""",
+SPEECH CONTENT REQUIREMENTS:
+- MUST be a practical health/fitness tip (NOT motivational)
+- Focus on actionable advice (what to do, how to do it)
+- Avoid motivational language like "you can do it", "believe in yourself"
+- Use instructional language like "try this", "do this", "use this method"
+- Examples: "Drink lemon water for energy", "Try chamomile tea for sleep", "Take deep breaths for focus" """,
 
-            'Fitness': """You are an expert fitness trainer and exercise physiologist.
+            'Fitness': """You are a fitness expert. Create a 12-second video + blog post about exercise.
 
-Generate a complete content package for a fitness and exercise blog.
-
-CRITICAL VIDEO PROMPT REQUIREMENTS:
-- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
-- Single continuous shot (no scene changes)
-- Expert fitness trainer talking directly to camera
-- Professional expert in relevant fitness environment (gym, studio, or professional setup)
-- Include exact timing breakdown that totals EXACTLY 12 seconds
-- Specify: camera angle, lighting, setting, expert appearance
-- Expert should look like a real fitness trainer/coach
-- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
-- Professional attire (fitness gear, athletic wear, or professional clothing)
-- STRONG HOOK in first 3-4 seconds to grab attention
-- NO third-party products, brands, or commercial items visible
-- Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities)
-- Complete the tip in 10 seconds
+VIDEO REQUIREMENTS:
+- 12 seconds total (no more, no less)
+- Expert talking to camera in gym or outdoor
+- Natural remedies only (NO products, technology, or devices)
+- Hook: 3-4 seconds, Tip: 8-9 seconds
+- Character: European/English/African only
+- Attire: Athletic wear (yoga pants, tank top) NOT medical scrubs
+- Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
-- 800-1500 words
-- SEO optimized for fitness and exercise niche
-- Actionable, practical fitness advice
-- Expert trainer tone but accessible
-- Include introduction, main content sections, conclusion
-- Focus on one clear fitness benefit/tip
-- Evidence-based when possible
-- Engaging headlines and subheadings
+- 800-1500 words about fitness
+- Category: Fitness
+- SEO optimized with keywords
+- Natural remedies focus
+- Include title, meta description, tags""",
 
-SEO REQUIREMENTS:
-- Compelling title with fitness keywords
-- Meta description (150-160 characters)
-- 3-5 relevant fitness tags
-- Focus keywords for search
-- Category (Fitness, Exercise, Workout, etc.)""",
+            'Mental Health': """You are a mental health expert. Create a 12-second video + blog post about wellness.
 
-            'Mental Health': """You are an expert mental health professional and psychologist.
-
-Generate a complete content package for a mental health and wellness blog.
-
-CRITICAL VIDEO PROMPT REQUIREMENTS:
-- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
-- Single continuous shot (no scene changes)
-- Expert mental health professional talking directly to camera
-- Professional expert in relevant mental health environment (office, clinic, or professional setup)
-- Include exact timing breakdown that totals EXACTLY 12 seconds
-- Specify: camera angle, lighting, setting, expert appearance
-- Expert should look like a real psychologist/therapist
-- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
-- Professional attire (lab coat, medical scrubs, or professional clothing)
-- STRONG HOOK in first 3-4 seconds to grab attention
-- NO third-party products, brands, or commercial items visible
-- Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities)
-- Complete the tip in 10 seconds
+VIDEO REQUIREMENTS:
+- 12 seconds total (no more, no less)
+- Expert talking to camera in office or home
+- Natural remedies only (NO products, technology, or devices)
+- Hook: 3-4 seconds, Tip: 8-9 seconds
+- Character: European/English/African only
+- Attire: Casual professional (blouse, cardigan) NOT medical scrubs
+- Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
-- 800-1500 words
-- SEO optimized for mental health and wellness niche
-- Actionable, practical mental health advice
-- Expert psychologist tone but accessible
-- Include introduction, main content sections, conclusion
-- Focus on one clear mental health benefit/tip
-- Evidence-based when possible
-- Engaging headlines and subheadings
+- 800-1500 words about mental health
+- Category: Mental Health
+- SEO optimized with keywords
+- Natural remedies focus
+- Include title, meta description, tags""",
 
-SEO REQUIREMENTS:
-- Compelling title with mental health keywords
-- Meta description (150-160 characters)
-- 3-5 relevant mental health tags
-- Focus keywords for search
-- Category (Mental Health, Wellness, Stress Management, etc.)""",
+            'Sleep': """You are a sleep expert. Create a 12-second video + blog post about sleep.
 
-            'Sleep': """You are an expert sleep specialist and sleep medicine doctor.
-
-Generate a complete content package for a sleep and rest optimization blog.
-
-CRITICAL VIDEO PROMPT REQUIREMENTS:
-- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
-- Single continuous shot (no scene changes)
-- Expert sleep specialist talking directly to camera
-- Professional expert in relevant sleep environment (bedroom, clinic, or professional setup)
-- Include exact timing breakdown that totals EXACTLY 12 seconds
-- Specify: camera angle, lighting, setting, expert appearance
-- Expert should look like a real sleep doctor/specialist
-- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
-- Professional attire (lab coat, medical scrubs, or professional clothing)
-- STRONG HOOK in first 3-4 seconds to grab attention
-- NO third-party products, brands, or commercial items visible
-- Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities)
-- Complete the tip in 10 seconds
+VIDEO REQUIREMENTS:
+- 12 seconds total (no more, no less)
+- Expert talking to camera in bedroom
+- Natural remedies only (NO products, technology, or devices)
+- Hook: 3-4 seconds, Tip: 8-9 seconds
+- Character: European/English/African only
+- Attire: Comfortable clothes (sweater, pajamas) NOT medical scrubs
+- Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
-- 800-1500 words
-- SEO optimized for sleep and rest niche
-- Actionable, practical sleep advice
-- Expert sleep specialist tone but accessible
-- Include introduction, main content sections, conclusion
-- Focus on one clear sleep benefit/tip
-- Evidence-based when possible
-- Engaging headlines and subheadings
+- 800-1500 words about sleep
+- Category: Sleep
+- SEO optimized with keywords
+- Natural remedies focus
+- Include title, meta description, tags""",
 
-SEO REQUIREMENTS:
-- Compelling title with sleep keywords
-- Meta description (150-160 characters)
-- 3-5 relevant sleep tags
-- Focus keywords for search
-- Category (Sleep, Rest, Sleep Hygiene, etc.)""",
+            'Hydration': """You are a hydration expert. Create a 12-second video + blog post about water intake.
 
-            'Hydration': """You are an expert hydration specialist and sports medicine doctor.
-
-Generate a complete content package for a hydration and water intake blog.
-
-CRITICAL VIDEO PROMPT REQUIREMENTS:
-- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
-- Single continuous shot (no scene changes)
-- Expert hydration specialist talking directly to camera
-- Professional expert in relevant hydration environment (clinic, gym, or professional setup)
-- Include exact timing breakdown that totals EXACTLY 12 seconds
-- Specify: camera angle, lighting, setting, expert appearance
-- Expert should look like a real hydration specialist/doctor
-- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
-- Professional attire (lab coat, medical scrubs, or professional clothing)
-- STRONG HOOK in first 3-4 seconds to grab attention
-- NO third-party products, brands, or commercial items visible
-- Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities)
-- Complete the tip in 10 seconds
+VIDEO REQUIREMENTS:
+- 12 seconds total (no more, no less)
+- Expert talking to camera in gym or outdoor
+- Natural remedies only (NO products, technology, or devices)
+- Hook: 3-4 seconds, Tip: 8-9 seconds
+- Character: European/English/African only
+- Attire: Athletic wear (sports wear) NOT medical scrubs
+- Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
-- 800-1500 words
-- SEO optimized for hydration and water intake niche
-- Actionable, practical hydration advice
-- Expert hydration specialist tone but accessible
-- Include introduction, main content sections, conclusion
-- Focus on one clear hydration benefit/tip
-- Evidence-based when possible
-- Engaging headlines and subheadings
-
-SEO REQUIREMENTS:
-- Compelling title with hydration keywords
-- Meta description (150-160 characters)
-- 3-5 relevant hydration tags
-- Focus keywords for search
-- Category (Hydration, Water Intake, Fluid Balance, etc.)"""
+- 800-1500 words about hydration
+- Category: Hydration
+- SEO optimized with keywords
+- Natural remedies focus
+- Include title, meta description, tags"""
         }
         
         # Default to general health if category not found
-        default_prompt = """You are an expert health professional and wellness specialist.
+        default_prompt = """You are a health expert. Create a 12-second video + blog post about wellness.
 
-Generate a complete content package for a health and wellness blog.
-
-CRITICAL VIDEO PROMPT REQUIREMENTS:
-- EXACTLY 12 seconds of content (STRICT LIMIT - NO MORE, NO LESS)
-- Single continuous shot (no scene changes)
-- Expert health professional talking directly to camera
-- Professional expert in relevant health environment (clinic, office, or professional setup)
-- Include exact timing breakdown that totals EXACTLY 12 seconds
-- Specify: camera angle, lighting, setting, expert appearance
-- Expert should look like a real health professional
-- Focus on NATURAL/HOME REMEDIES and LIFESTYLE TIPS (NO product promotion)
-- Professional attire (lab coat, medical scrubs, or professional clothing)
-- STRONG HOOK in first 3-4 seconds to grab attention
-- NO third-party products, brands, or commercial items visible
-- Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities)
-- Complete the tip in 10 seconds
+VIDEO REQUIREMENTS:
+- 12 seconds total (no more, no less)
+- Expert talking to camera in home or office
+- Natural remedies only (NO products, technology, or devices)
+- Hook: 3-4 seconds, Tip: 8-9 seconds
+- Character: European/English/African only
+- Attire: Casual professional (wellness clothing) NOT medical scrubs
+- Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
+- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
+- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
-- 800-1500 words
-- SEO optimized for health and wellness niche
-- Actionable, practical health advice
-- Expert health professional tone but accessible
-- Include introduction, main content sections, conclusion
-- Focus on one clear health benefit/tip
-- Evidence-based when possible
-- Engaging headlines and subheadings
+- 800-1500 words about health
+- Category: Health
+- SEO optimized with keywords
+- Natural remedies focus
+- Include title, meta description, tags
 
-SEO REQUIREMENTS:
-- Compelling title with health keywords
-- Meta description (150-160 characters)
-- 3-5 relevant health tags
-- Focus keywords for search
-- Category (Health, Wellness, Lifestyle, etc.)"""
+SPEECH CONTENT REQUIREMENTS:
+- MUST be a practical health/fitness tip (NOT motivational)
+- Focus on actionable advice (what to do, how to do it)
+- Avoid motivational language like "you can do it", "believe in yourself"
+- Use instructional language like "try this", "do this", "use this method"
+- Examples: "Drink lemon water for energy", "Try chamomile tea for sleep", "Take deep breaths for focus" """
         
         return category_prompts.get(category, default_prompt)
+    
+    def _get_character_variety(self, category: str) -> str:
+        """Get diverse character types for each category."""
+        import random
+        
+        character_varieties = {
+            'Nutrition': [
+                "chef in kitchen", "nutritionist in garden", "wellness coach at home",
+                "dietitian in clinic", "healthy cooking instructor", "organic food specialist"
+            ],
+            'Fitness': [
+                "yoga instructor in studio", "personal trainer at gym", "fitness coach outdoors",
+                "pilates instructor", "crossfit trainer", "outdoor fitness guide"
+            ],
+            'Mental Health': [
+                "therapist in office", "wellness coach at home", "meditation instructor",
+                "life coach in nature", "stress management specialist", "mindfulness expert"
+            ],
+            'Sleep': [
+                "sleep specialist in bedroom", "wellness coach in bedroom", "sleep consultant at home",
+                "relaxation expert in bedroom", "sleep therapist in clinic"
+            ],
+            'Hydration': [
+                "hydration specialist at gym", "sports nutritionist outdoors", "wellness coach at home",
+                "fitness trainer with water", "health coach in nature"
+            ]
+        }
+        
+        return random.choice(character_varieties.get(category, ["health professional"]))
+    
+    def _validate_environment(self, category: str, environment: str) -> bool:
+        """Validate that environment matches category requirements."""
+        
+        valid_environments = {
+            'Nutrition': ['kitchen', 'garden', 'farmers market', 'home', 'clinic', 'cooking area', 'organic garden'],
+            'Fitness': ['gym', 'studio', 'park', 'outdoor', 'home workout', 'yoga studio', 'hiking trail', 'beach'],
+            'Mental Health': ['office', 'home', 'nature', 'clinic', 'therapy room', 'meditation space'],
+            'Sleep': ['bedroom', 'home', 'clinic', 'sleep center', 'relaxation space'],
+            'Hydration': ['gym', 'outdoor', 'home', 'clinic', 'sports center', 'nature']
+        }
+        
+        return any(valid_env in environment.lower() for valid_env in valid_environments.get(category, []))
     
     def _build_user_prompt(self, topic: str, category: str, difficulty: str) -> str:
         """Build user prompt for content generation."""
@@ -351,7 +325,11 @@ SEO REQUIREMENTS:
         if difficulty:
             user_prompt += f"\nDifficulty level: {difficulty}"
         
-        user_prompt += "\n\nIMPORTANT: Video prompt must be DETAILED with exact timing that totals EXACTLY 12 seconds. Focus on natural health tips, home remedies, lifestyle advice - NO product promotion. Include a strong hook in the first 3-4 seconds. Add European/English/African race character in the video (NO Asian, Hispanic, or other ethnicities). Complete the tip in 10 seconds.\n\nRACE RESTRICTIONS: Only use European (Caucasian), English, or African race characters. NO Asian, Hispanic, Middle Eastern, or other ethnicities allowed.\n\nCRITICAL: Keep the spoken content SHORT - maximum 2-3 sentences total. The expert should speak quickly and concisely. NO long explanations or detailed descriptions. Just the essential tip that can be delivered in 10 seconds of speech.\n\nReturn ONLY valid JSON with this exact structure."
+        # Add character variety suggestion
+        character_suggestion = self._get_character_variety(category)
+        user_prompt += f"\n\nCHARACTER VARIETY: Use this character type: {character_suggestion}"
+        
+        user_prompt += "\n\nIMPORTANT RULES:\n- 12 seconds total video (STRICT LIMIT)\n- Natural remedies only (NO products, technology, devices)\n- European/English/African characters only\n- MAXIMUM 1 sentence speech (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)\n- Hook: 3-4 seconds, Tip: 8-9 seconds\n- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)\n- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)\n- Appropriate environment for category\n- Return valid JSON"
         
         return user_prompt
     
