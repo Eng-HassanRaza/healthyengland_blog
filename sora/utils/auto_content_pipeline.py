@@ -37,6 +37,20 @@ class AutoContentPipeline:
                 raise ValueError("No admin user found. Create one first.")
         except Exception as e:
             raise ValueError(f"Could not get author: {e}")
+        
+        # Fallback topics and categories for robust generation
+        self.fallback_topics = [
+            "Energy Boost", "Sleep Better", "Stress Relief", "Hydration Tips", 
+            "Healthy Snacks", "Morning Routine", "Evening Routine", "Mental Health",
+            "Physical Fitness", "Nutrition Tips", "Immune System", "Digestive Health",
+            "Heart Health", "Brain Function", "Skin Care", "Hair Health",
+            "Weight Management", "Muscle Building", "Flexibility", "Meditation"
+        ]
+        
+        self.fallback_categories = [
+            "Health", "Wellness", "Nutrition", "Fitness", "Mental Health",
+            "Sleep", "Hydration", "Stress Management", "Lifestyle", "Prevention"
+        ]
     
     def _optimize_video_prompt(self, prompt: str) -> str:
         """
@@ -298,6 +312,125 @@ Return ONLY the optimized prompt, nothing else.
         except Exception:
             return speech_text.strip()
     
+    def _generate_content_with_fallbacks(self, original_topic: Optional[str] = None, original_category: Optional[str] = None, max_attempts: int = 5) -> Dict:
+        """
+        Generate content with robust fallback system to ensure content is always generated.
+        
+        Args:
+            original_topic: Original topic to try first
+            original_category: Original category to try first
+            max_attempts: Maximum number of attempts (default 5)
+            
+        Returns:
+            Dict with success status and content data
+        """
+        import random
+        
+        # Prepare topic and category lists for fallbacks
+        topics_to_try = []
+        categories_to_try = []
+        
+        # Add original topic/category first if provided
+        if original_topic:
+            topics_to_try.append(original_topic)
+        if original_category:
+            categories_to_try.append(original_category)
+        
+        # Add fallback topics and categories
+        topics_to_try.extend(self.fallback_topics)
+        categories_to_try.extend(self.fallback_categories)
+        
+        # Remove duplicates while preserving order
+        topics_to_try = list(dict.fromkeys(topics_to_try))
+        categories_to_try = list(dict.fromkeys(categories_to_try))
+        
+        print(f"🔄 Robust content generation: Will try up to {max_attempts} combinations")
+        print(f"   📝 Topics to try: {len(topics_to_try)}")
+        print(f"   📂 Categories to try: {len(categories_to_try)}")
+        
+        for attempt in range(max_attempts):
+            # Select topic and category for this attempt
+            if attempt < len(topics_to_try):
+                current_topic = topics_to_try[attempt]
+            else:
+                # Random selection if we've exhausted the list
+                current_topic = random.choice(self.fallback_topics)
+            
+            if attempt < len(categories_to_try):
+                current_category = categories_to_try[attempt]
+            else:
+                # Random selection if we've exhausted the list
+                current_category = random.choice(self.fallback_categories)
+            
+            print(f"\n🎯 Attempt {attempt + 1}/{max_attempts}: Topic='{current_topic}', Category='{current_category}'")
+            
+            try:
+                # Generate content with current topic/category
+                content_result = self.content_generator.generate_content_package(
+                    topic=current_topic,
+                    category=current_category,
+                    use_smart_selection=True
+                )
+                
+                if not content_result['success']:
+                    print(f"   ❌ Content generation failed: {content_result['error']}")
+                    continue
+                
+                content_data = content_result['data']
+                
+                if not content_data or 'blog_post' not in content_data:
+                    print(f"   ❌ Invalid content data received")
+                    continue
+                
+                blog_post = content_data.get('blog_post', {})
+                title = blog_post.get('title', '')
+                category = blog_post.get('category', 'Unknown')
+                
+                print(f"   📝 Generated: '{title}' (Category: {category})")
+                
+                # Check for similarity
+                try:
+                    similarity_check = self.duplicate_detector.check_content_similarity(title, title, category)
+                    if similarity_check['is_similar']:
+                        print(f"   ⚠️ Content too similar: {similarity_check['recommendations']}")
+                        continue
+                    
+                    print(f"   ✅ Content is unique and diverse")
+                    
+                    # Check for duplicates
+                    unique_id = content_data.get('diversity_metadata', {}).get('unique_id')
+                    if check_duplicate_post(title=title, unique_id=unique_id):
+                        print(f"   ⚠️ Duplicate content detected: {title}")
+                        continue
+                    
+                    print(f"   ✅ No duplicates found")
+                    
+                    # Success! Return the content
+                    print(f"🎉 Successfully generated unique content on attempt {attempt + 1}")
+                    return {
+                        "success": True,
+                        "data": content_data,
+                        "attempt": attempt + 1,
+                        "topic_used": current_topic,
+                        "category_used": current_category
+                    }
+                    
+                except Exception as e:
+                    print(f"   ⚠️ Similarity check failed: {e}")
+                    # Continue to next attempt
+                    continue
+                    
+            except Exception as e:
+                print(f"   ❌ Attempt {attempt + 1} failed: {e}")
+                continue
+        
+        # If we get here, all attempts failed
+        return {
+            "success": False,
+            "error": f"Failed to generate unique content after {max_attempts} attempts",
+            "attempts": max_attempts
+        }
+    
     def _fallback_optimize_prompt(self, prompt: str) -> str:
         """
         Fallback optimization when AI is not available.
@@ -520,19 +653,20 @@ Return ONLY the optimized prompt, nothing else.
         
         # Step 1: Generate content package with diversity optimization
         print("Step 1: Generating diverse content with OpenAI...")
-        content_result = self.content_generator.generate_content_package(
-            topic=topic,
-            category=category,
-            use_smart_selection=True  # Enable smart selection for diversity
+        content_result = self._generate_content_with_fallbacks(
+            original_topic=topic,
+            original_category=category,
+            max_attempts=5
         )
         
         if not content_result['success']:
             return {
                 "success": False,
-                "error": f"Content generation failed: {content_result['error']}"
+                "error": f"Content generation failed after {content_result.get('attempts', 5)} attempts: {content_result['error']}"
             }
         
         content_data = content_result['data']
+        attempt_info = f" (Attempt {content_result['attempt']}, Topic: {content_result['topic_used']}, Category: {content_result['category_used']})"
         
         # Validate content_data structure
         if not content_data:
@@ -567,31 +701,15 @@ Return ONLY the optimized prompt, nothing else.
         if 'diversity_metadata' in content_data:
             print(f"   Diversity metadata: {content_data['diversity_metadata']}")
         
-        # Step 1.5: Enhanced duplicate detection
-        print("\nStep 1.5: Checking for content similarity...")
+        # Step 1.5: Content validation (similarity already checked in fallback method)
+        print("\nStep 1.5: Content validation...")
         blog_post = content_data.get('blog_post', {})
         title = blog_post.get('title', '')
-        topic = blog_post.get('title', '')  # Use title as topic
         category = blog_post.get('category', 'Unknown')
         
-        # Debug: Print content structure
         print(f"   Title: {title}")
         print(f"   Category: {category}")
-        
-        # Check for similarity using enhanced duplicate detection
-        try:
-            similarity_check = self.duplicate_detector.check_content_similarity(title, topic, category)
-            if similarity_check['is_similar']:
-                return {
-                    "success": False,
-                    "error": f"Content too similar to recent content: {similarity_check['recommendations']}",
-                    "duplicate": True
-                }
-            
-            print("✅ Content is unique and diverse")
-        except Exception as e:
-            print(f"⚠️ Duplicate detection failed: {e}")
-            print("   Continuing without duplicate check...")
+        print(f"   ✅ Content is unique and diverse{attempt_info}")
         
         # Validate video prompt (skip if method doesn't exist)
         video_prompt_data = content_data.get('video_prompt', {})
@@ -610,29 +728,16 @@ Return ONLY the optimized prompt, nothing else.
         
         print(f"✅ Content generated: {content_data['blog_post']['title']}")
         print(f"   Category: {content_data['blog_post']['category']}")
-        try:
-            print(f"   Diversity Score: {similarity_check['overall_similarity']:.2f}")
-        except:
-            print("   Diversity Score: N/A (check failed)")
+        print(f"   Diversity Score: N/A (checked in fallback method)")
         
         # Debug: Print video prompt details
         print(f"   Video prompt length: {len(video_prompt) if 'video_prompt' in locals() else 'N/A'}")
         if 'video_prompt' in locals():
             print(f"   Video prompt preview: {video_prompt[:100]}...")
         
-        # Step 2: Check for duplicates
-        print("\nStep 2: Checking for duplicates...")
-        unique_id = content_data.get('diversity_metadata', {}).get('unique_id')
-        title = content_data['blog_post'].get('title')
-        
-        if check_duplicate_post(title=title, unique_id=unique_id):
-            return {
-                "success": False,
-                "error": f"Duplicate content detected: {title}",
-                "duplicate": True
-            }
-        
-        print("✅ No duplicates found")
+        # Step 2: Content validation complete (duplicates already checked in fallback method)
+        print("\nStep 2: Content validation complete...")
+        print("✅ No duplicates found (verified in fallback method)")
         
         # Step 3: Generate video with Sora (or skip in test mode)
         if test_mode:
