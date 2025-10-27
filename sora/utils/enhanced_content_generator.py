@@ -137,43 +137,32 @@ class EnhancedContentGenerator:
 
 VIDEO REQUIREMENTS:
 - 12 seconds total (no more, no less)
-- Expert talking to camera in kitchen or garden
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip for maintaining and achieving better health
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - Natural remedies only (NO products, technology, or devices)
-- Hook: 3-4 seconds, Tip: 8-9 seconds
-- Character: European/English/African only
-- Attire: Chef apron or casual professional (NOT medical scrubs)
 - Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words about nutrition
 - Category: Nutrition
 - SEO optimized with keywords
 - Natural remedies focus
-- Include title, meta description, tags
-
-SPEECH CONTENT REQUIREMENTS:
-- MUST be a practical health/fitness tip (NOT motivational)
-- Focus on actionable advice (what to do, how to do it)
-- Avoid motivational language like "you can do it", "believe in yourself"
-- Use instructional language like "try this", "do this", "use this method"
-- Examples: "Drink lemon water for energy", "Try chamomile tea for sleep", "Take deep breaths for focus" """,
+- Include title, meta description, tags""",
 
             'Fitness': """You are a fitness expert. Create a 12-second video + blog post about exercise.
 
 VIDEO REQUIREMENTS:
 - 12 seconds total (no more, no less)
-- Expert talking to camera in gym or outdoor
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip for maintaining and achieving better health
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - Natural remedies only (NO products, technology, or devices)
-- Hook: 3-4 seconds, Tip: 8-9 seconds
-- Character: European/English/African only
-- Attire: Athletic wear (yoga pants, tank top) NOT medical scrubs
 - Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words about fitness
@@ -186,14 +175,13 @@ BLOG POST REQUIREMENTS:
 
 VIDEO REQUIREMENTS:
 - 12 seconds total (no more, no less)
-- Expert talking to camera in office or home
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip for maintaining and achieving better health
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - Natural remedies only (NO products, technology, or devices)
-- Hook: 3-4 seconds, Tip: 8-9 seconds
-- Character: European/English/African only
-- Attire: Casual professional (blouse, cardigan) NOT medical scrubs
 - Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words about mental health
@@ -206,14 +194,13 @@ BLOG POST REQUIREMENTS:
 
 VIDEO REQUIREMENTS:
 - 12 seconds total (no more, no less)
-- Expert talking to camera in bedroom
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip for maintaining and achieving better health
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - Natural remedies only (NO products, technology, or devices)
-- Hook: 3-4 seconds, Tip: 8-9 seconds
-- Character: European/English/African only
-- Attire: Comfortable clothes (sweater, pajamas) NOT medical scrubs
 - Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words about sleep
@@ -226,14 +213,13 @@ BLOG POST REQUIREMENTS:
 
 VIDEO REQUIREMENTS:
 - 12 seconds total (no more, no less)
-- Expert talking to camera in gym or outdoor
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip for maintaining and achieving better health
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - Natural remedies only (NO products, technology, or devices)
-- Hook: 3-4 seconds, Tip: 8-9 seconds
-- Character: European/English/African only
-- Attire: Athletic wear (sports wear) NOT medical scrubs
 - Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words about hydration
@@ -248,59 +234,26 @@ BLOG POST REQUIREMENTS:
 
 VIDEO REQUIREMENTS:
 - 12 seconds total (no more, no less)
-- Expert talking to camera in home or office
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip for maintaining and achieving better health
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - Natural remedies only (NO products, technology, or devices)
-- Hook: 3-4 seconds, Tip: 8-9 seconds
-- Character: European/English/African only
-- Attire: Casual professional (wellness clothing) NOT medical scrubs
 - Speech: MAXIMUM 1 sentence (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
 
 BLOG POST REQUIREMENTS:
 - 800-1500 words about health
 - Category: Health
 - SEO optimized with keywords
 - Natural remedies focus
-- Include title, meta description, tags
-
-SPEECH CONTENT REQUIREMENTS:
-- MUST be a practical health/fitness tip (NOT motivational)
-- Focus on actionable advice (what to do, how to do it)
-- Avoid motivational language like "you can do it", "believe in yourself"
-- Use instructional language like "try this", "do this", "use this method"
-- Examples: "Drink lemon water for energy", "Try chamomile tea for sleep", "Take deep breaths for focus" """
+- Include title, meta description, tags"""
         
         return category_prompts.get(category, default_prompt)
     
     def _get_character_variety(self, category: str) -> str:
-        """Get diverse character types for each category."""
-        import random
-        
-        character_varieties = {
-            'Nutrition': [
-                "chef in kitchen", "nutritionist in garden", "wellness coach at home",
-                "dietitian in clinic", "healthy cooking instructor", "organic food specialist"
-            ],
-            'Fitness': [
-                "yoga instructor in studio", "personal trainer at gym", "fitness coach outdoors",
-                "pilates instructor", "crossfit trainer", "outdoor fitness guide"
-            ],
-            'Mental Health': [
-                "therapist in office", "wellness coach at home", "meditation instructor",
-                "life coach in nature", "stress management specialist", "mindfulness expert"
-            ],
-            'Sleep': [
-                "sleep specialist in bedroom", "wellness coach in bedroom", "sleep consultant at home",
-                "relaxation expert in bedroom", "sleep therapist in clinic"
-            ],
-            'Hydration': [
-                "hydration specialist at gym", "sports nutritionist outdoors", "wellness coach at home",
-                "fitness trainer with water", "health coach in nature"
-            ]
-        }
-        
-        return random.choice(character_varieties.get(category, ["health professional"]))
+        """Get character description for the new format."""
+        return "white blonde doctor in her 30s"
     
     def _validate_environment(self, category: str, environment: str) -> bool:
         """Validate that environment matches category requirements."""
@@ -329,7 +282,7 @@ SPEECH CONTENT REQUIREMENTS:
         character_suggestion = self._get_character_variety(category)
         user_prompt += f"\n\nCHARACTER VARIETY: Use this character type: {character_suggestion}"
         
-        user_prompt += "\n\nIMPORTANT RULES:\n- 12 seconds total video (STRICT LIMIT)\n- Natural remedies only (NO products, technology, devices)\n- European/English/African characters only\n- MAXIMUM 1 sentence speech (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)\n- Hook: 3-4 seconds, Tip: 8-9 seconds\n- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)\n- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)\n- Appropriate environment for category\n- Return valid JSON"
+        user_prompt += "\n\nIMPORTANT RULES:\n- 12 seconds total video (STRICT LIMIT)\n- A white blonde doctor in her 30s giving home remedy tips for better health\n- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)\n- NO person should be displayed in this background full screen display\n- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip\n- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length\n- Natural remedies only (NO products, technology, devices)\n- MAXIMUM 1 sentence speech (8-10 words total) - MUST be a practical health/fitness tip (NOT motivational)\n- Return valid JSON"
         
         return user_prompt
     

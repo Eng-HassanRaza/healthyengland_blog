@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # Auto Generate Content Script with Email Notifications
-# Runs twice daily at 9:00 AM and 3:00 PM UK time
+# Runs 3 times daily at optimal TikTok engagement times (US Eastern Time):
+# - 6:00 AM EST (Early morning peak)
+# - 10:00 AM EST (Mid-morning break peak) 
+# - 7:00 PM EST (Evening peak)
 
 # Configuration
 PROJECT_DIR="/var/www/healthyengland"

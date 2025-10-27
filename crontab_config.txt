@@ -1,0 +1,16 @@
+# TikTok Optimal Posting Times (US Eastern Time)
+# Based on peak TikTok user engagement patterns
+# Runs 3 times daily at optimal US engagement times
+
+# 6:00 AM EST - Early morning peak (before work/school)
+0 6 * * * /var/www/healthyengland/scripts/auto_generate_with_notifications.sh
+
+# 10:00 AM EST - Mid-morning break peak
+0 10 * * * /var/www/healthyengland/scripts/auto_generate_with_notifications.sh
+
+# 7:00 PM EST - Evening peak (after work/school)
+0 19 * * * /var/www/healthyengland/scripts/auto_generate_with_notifications.sh
+
+# Note: These times are in US Eastern Time (EST/EDT)
+# Server should be configured to US Eastern timezone
+# Daylight Saving Time is automatically handled by the system

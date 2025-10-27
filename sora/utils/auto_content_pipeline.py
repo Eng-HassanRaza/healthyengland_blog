@@ -74,16 +74,17 @@ CRITICAL REQUIREMENTS:
 - Make it extremely punchy and concise
 - Use short, simple words
 - Remove all unnecessary words
-- Keep the hook and tip structure but make them VERY short
-- ONLY use European/English/African race characters (NO Asian, Hispanic, or other ethnicities)
-- FIRST FRAME: Hook text overlay in center of screen (large, bold, readable text)
-- AUDIO BUFFER: Start with 2-second silence/pause before speech begins (to prevent first second audio cutoff)
+- A white blonde doctor in her 30s giving home remedy tips for better health
+- This video is live in the background full screen showing the actual remedy contents (how to make it, how to use it, how to avoid it)
+- NO person should be displayed in this background full screen display
+- In the bottom left corner: a white blonde doctor in her 30s should be giving this home remedy tip
+- Video timing: wait for half a second before starting, end talking half or one second before 12-second video length
 - MUST be a practical health/fitness tip (NOT motivational content)
 
 EXAMPLES OF GOOD 12-SECOND HEALTH/FITNESS TIPS:
-- "Expert says: 'Low energy? Drink lemon water for instant boost.' First frame shows 'Low energy?' as large text overlay. Start with 2-second silence before speech."
-- "Expert says: 'Can't sleep? Try chamomile tea before bed.' First frame shows 'Can't sleep?' as large text overlay. Start with 2-second silence before speech."
-- "Expert says: 'Need focus? Take a 5-minute walk outside.' First frame shows 'Need focus?' as large text overlay. Start with 2-second silence before speech."
+- "A white blonde doctor in her 30s in bottom left corner says: 'Low energy? Drink lemon water for instant boost.' Background shows how to make lemon water. Wait 0.5s before speaking, end 0.5s before 12s."
+- "A white blonde doctor in her 30s in bottom left corner says: 'Can't sleep? Try chamomile tea before bed.' Background shows how to prepare chamomile tea. Wait 0.5s before speaking, end 0.5s before 12s."
+- "A white blonde doctor in her 30s in bottom left corner says: 'Need focus? Take a 5-minute walk outside.' Background shows walking technique. Wait 0.5s before speaking, end 0.5s before 12s."
 
 Return ONLY the optimized prompt, nothing else.
 """
@@ -111,6 +112,191 @@ Return ONLY the optimized prompt, nothing else.
         except Exception as e:
             print(f"   ⚠️ AI optimization failed: {e}")
             return self._fallback_optimize_prompt(prompt)
+    
+    def _extract_remedy_content(self, blog_post: dict) -> str:
+        """
+        Extract specific remedy content from blog post for video background.
+        
+        Args:
+            blog_post: Blog post content dictionary
+            
+        Returns:
+            String with specific remedy instructions for video background
+        """
+        try:
+            content = blog_post.get('content', [])
+            if isinstance(content, list):
+                # Look for sections with remedy subsections
+                for section in content:
+                    if isinstance(section, dict):
+                        # Check if this section has remedy subsections
+                        subsections = section.get('subsections', [])
+                        if subsections:
+                            remedy_instructions = []
+                            for subsection in subsections[:3]:  # Take first 3 remedies
+                                if isinstance(subsection, dict):
+                                    title = subsection.get('title', '')
+                                    paragraph = subsection.get('paragraph', '')
+                                    if title and paragraph:
+                                        # Extract key instructions (just first sentence)
+                                        instructions = paragraph.split('. ')[:1]  # First sentence only
+                                        remedy_instructions.append(f"{title}: {' '.join(instructions)}")
+                            
+                            if remedy_instructions:
+                                return '. '.join(remedy_instructions)
+                        
+                        # Also check for section_content with remedy_title
+                        section_content = section.get('section_content', [])
+                        if isinstance(section_content, list):
+                            remedy_instructions = []
+                            for remedy in section_content[:3]:  # Take first 3 remedies
+                                if isinstance(remedy, dict):
+                                    title = remedy.get('remedy_title', '')
+                                    description = remedy.get('remedy_description', '')
+                                    if title and description:
+                                        # Extract key instructions (just first sentence)
+                                        instructions = description.split('. ')[:1]  # First sentence only
+                                        remedy_instructions.append(f"{title}: {' '.join(instructions)}")
+                            
+                            if remedy_instructions:
+                                return '. '.join(remedy_instructions)
+            
+            # Fallback: look for any content with remedy keywords (very short versions)
+            content_str = str(content).lower()
+            if 'green tea' in content_str:
+                return "Green tea: Boil, steep, drink"
+            elif 'smoothie' in content_str:
+                return "Smoothie: Blend ingredients"
+            elif 'chocolate' in content_str:
+                return "Dark chocolate: Small piece"
+            elif 'nuts' in content_str:
+                return "Nuts: Handful snack"
+            elif 'water' in content_str or 'hydration' in content_str:
+                return "Hydration: Drink water"
+            
+            return "Natural remedy preparation and usage demonstration"
+            
+        except Exception as e:
+            print(f"   ⚠️ Error extracting remedy content: {e}")
+            return "Natural remedy preparation and usage demonstration"
+    
+    def _extract_speech_text(self, prompt_obj: dict) -> str:
+        """Extract spoken line from various prompt shapes.
+        Searches common keys recursively: speech, tip, hook, script.{tip|speech}, content.* variants.
+        Returns first plausible short string found, else empty string.
+        """
+        try:
+            from collections import deque
+            queue = deque()
+            if isinstance(prompt_obj, dict):
+                queue.append(prompt_obj)
+            elif isinstance(prompt_obj, list):
+                for item in prompt_obj:
+                    if isinstance(item, dict):
+                        queue.append(item)
+            
+            def extract_from_value(value) -> str:
+                if isinstance(value, str):
+                    return value.strip()
+                if isinstance(value, dict):
+                    # Prefer common text fields
+                    if 'text' in value and isinstance(value['text'], str):
+                        return value['text'].strip()
+                    if 'content' in value and isinstance(value['content'], str):
+                        return value['content'].strip()
+                    # Direct speech/tip fields
+                    if 'speech' in value and isinstance(value['speech'], str):
+                        return value['speech'].strip()
+                    if 'tip' in value and isinstance(value['tip'], str):
+                        return value['tip'].strip()
+                return ''
+            
+            seen = set()
+            while queue:
+                node = queue.popleft()
+                node_id = id(node)
+                if node_id in seen:
+                    continue
+                seen.add(node_id)
+                
+                # Direct fields
+                for key in ('speech', 'tip', 'hook'):
+                    if key in node:
+                        text = extract_from_value(node[key])
+                        if text:
+                            return text
+                
+                # Script variants
+                if 'script' in node and isinstance(node['script'], (dict, list)):
+                    script = node['script']
+                    if isinstance(script, dict):
+                        for key in ('speech', 'tip', 'hook'):
+                            if key in script:
+                                text = extract_from_value(script[key])
+                                if text:
+                                    return text
+                    else:
+                        for item in script:
+                            if isinstance(item, dict):
+                                for key in ('speech', 'tip', 'hook', 'text', 'content'):
+                                    if key in item:
+                                        text = extract_from_value(item[key])
+                                        if text:
+                                            return text
+                
+                # Content variants
+                if 'content' in node and isinstance(node['content'], (dict, list)):
+                    content = node['content']
+                    if isinstance(content, dict):
+                        # Common nested paths like content.character.speech, content.doctor.speech, content.remedy_details.tip.speech
+                        for path in (
+                            ('character', 'speech'),
+                            ('doctor', 'speech'),
+                            ('remedy_details', 'tip', 'speech'),
+                            ('remedy', 'tip', 'speech'),
+                        ):
+                            cur = content
+                            ok = True
+                            for part in path:
+                                if isinstance(cur, dict) and part in cur:
+                                    cur = cur[part]
+                                else:
+                                    ok = False
+                                    break
+                            if ok:
+                                text = extract_from_value(cur)
+                                if text:
+                                    return text
+                        # Fallback: breadth-first through content dict
+                        for v in content.values():
+                            if isinstance(v, (dict, list)):
+                                queue.append(v)
+                            else:
+                                text = extract_from_value(v)
+                                if text:
+                                    return text
+                    else:
+                        for item in content:
+                            if isinstance(item, (dict, list)):
+                                queue.append(item)
+                
+                # Enqueue other dict values
+                for v in node.values():
+                    if isinstance(v, (dict, list)):
+                        queue.append(v)
+            return ''
+        except Exception:
+            return ''
+    
+    def _constrain_speech_length(self, speech_text: str, max_words: int = 10) -> str:
+        """Ensure speech fits within target duration by capping words."""
+        try:
+            words = speech_text.strip().split()
+            if len(words) <= max_words:
+                return speech_text.strip()
+            return ' '.join(words[:max_words]).rstrip(',;:.!')
+        except Exception:
+            return speech_text.strip()
     
     def _fallback_optimize_prompt(self, prompt: str) -> str:
         """
@@ -216,6 +402,93 @@ Return ONLY the optimized prompt, nothing else.
             print(f"   ⚠️ Fallback optimization failed: {e}")
             # Last resort - MUCH MORE AGGRESSIVE truncation for 12-second videos
             return prompt[:80] + "..." if len(prompt) > 80 else prompt
+    
+    def _infer_goal_phrase(self, blog_post: dict) -> str:
+        """Infer a short goal phrase like 'to boost energy' or 'to sleep better'."""
+        try:
+            text = (str(blog_post) or '').lower()
+            if 'energy' in text:
+                return 'to boost energy'
+            if 'sleep' in text:
+                return 'to sleep better'
+            if 'focus' in text or 'concentrat' in text:
+                return 'to improve focus'
+            if 'hydration' in text or 'water' in text:
+                return 'to stay hydrated'
+            return 'for better health'
+        except Exception:
+            return 'for better health'
+    
+    def _compose_speech_from_remedy(self, remedy_content: str, max_words: int = 12, lead_in: str = '') -> str:
+        """Compose a concise, natural one-sentence speech from remedy content.
+        Adds an optional lead-in (e.g., 'For a quick energy boost,').
+        Generates a human-sounding cadence with brief connectors.
+        """
+        text = (remedy_content or '').strip()
+        if not text:
+            return ''
+        import re, random
+        # Normalize
+        t = re.sub(r"\s+", " ", text)
+        # Common cleanup
+        t = re.sub(r"(?i)green tea brewing:\s*", "", t)
+        t = re.sub(r"(?i)natural remedy preparation and usage demonstration", "", t)
+        t = re.sub(r"(?i)how to (make|use|avoid):\s*", "", t)
+        t = t.replace("and enjoy", "").replace("enjoy", "")
+        # Split into clauses by comma/period
+        parts = re.split(r"[\.,;]\s*", t)
+        raw_actions = []
+        verbs = {
+            'boil': 'boil', 'add': 'add', 'steep': 'steep', 'strain': 'strain', 'mix': 'mix',
+            'blend': 'blend', 'pour': 'pour', 'squeeze': 'squeeze', 'stir': 'stir', 'drink': 'drink',
+            'sip': 'sip', 'use': 'use', 'avoid': 'avoid'
+        }
+        for p in parts:
+            pl = p.strip()
+            if not pl:
+                continue
+            lower = pl.lower()
+            if any(v in lower for v in verbs) or len(pl.split()) <= 6:
+                raw_actions.append(pl)
+            if len(raw_actions) >= 3:
+                break
+        if not raw_actions:
+            raw_actions = [t]
+        # Clean and humanize actions
+        actions = []
+        for a in raw_actions[:3]:
+            a = a.strip().rstrip('.')
+            # soften steep phrasing
+            a = re.sub(r"(?i)\bsteep(\b|\s)", "let it steep ", a)
+            # small tidy-ups
+            a = a.replace("  ", " ")
+            actions.append(a.lower())
+        # Choose a natural lead-in
+        default_leads = [
+            "Quick tip:",
+            "Try this:",
+            "Simple steps:",
+            "Here’s how:",
+        ]
+        lead_text = lead_in.strip().rstrip(',') if lead_in else random.choice(default_leads)
+        # Build with light connectors
+        if len(actions) == 1:
+            core = actions[0]
+        elif len(actions) == 2:
+            core = f"{actions[0]}, then {actions[1]}"
+        else:
+            core = f"{actions[0]}, then {actions[1]}, and {actions[2]}"
+        # Add a softener to first action
+        core = re.sub(r"^(boil|add|blend|mix|pour|squeeze|stir|drink|sip|use|avoid)", r"just \1", core)
+        sentence = f"{lead_text} {core}.".strip()
+        # Cap word count
+        words = sentence.split()
+        if len(words) > max_words:
+            sentence = ' '.join(words[:max_words]).rstrip(',;:.') + '.'
+        # Capitalize nicely
+        if sentence and not sentence[0].isupper():
+            sentence = sentence[0].upper() + sentence[1:]
+        return sentence
     
     def run(
         self,
@@ -368,113 +641,54 @@ Return ONLY the optimized prompt, nothing else.
             video_prompt_data = content_data.get('video_prompt', {})
             video_prompt_raw = video_prompt_data.get('content') or video_prompt_data.get('prompt') or video_prompt_data.get('script') or video_prompt_data.get('speech') or video_prompt_data
             
+            # Extract remedy content from blog post for better video prompts
+            remedy_content = self._extract_remedy_content(content_data.get('blog_post', {}))
+            if remedy_content:
+                print(f"   📋 Extracted remedy content: {remedy_content}")
+            
             if video_prompt_raw:
-                # Test prompt conversion (without sending to Sora)
-                if isinstance(video_prompt_raw, list):
-                    video_prompt = " ".join([
-                        f"{item.get('timestamp', item.get('time', ''))}: {item.get('text', item.get('description', ''))}" 
-                        for item in video_prompt_raw
-                    ])
-                elif isinstance(video_prompt_raw, dict):
-                    if 'script' in video_prompt_raw and isinstance(video_prompt_raw['script'], list):
-                        # Handle new script format with frames and text overlays
-                        script_frames = video_prompt_raw['script']
-                        if len(script_frames) >= 2:
-                            frame1_text = script_frames[0].get('text_overlay', '')
-                            frame2_text = script_frames[1].get('text_overlay', '')
-                            video_prompt = f"Expert says: '{frame1_text} {frame2_text}'"
-                        else:
-                            video_prompt = str(video_prompt_raw)
-                    elif 'content' in video_prompt_raw and 'hook' in video_prompt_raw['content'] and 'tip' in video_prompt_raw['content']:
-                        # Handle new content format with hook and tip
-                        hook_data = video_prompt_raw['content']['hook']
-                        tip_data = video_prompt_raw['content']['tip']
-                        hook_text = hook_data.get('text', hook_data.get('speech', ''))
-                        tip_text = tip_data.get('speech', tip_data.get('text', ''))
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'speech' in video_prompt_raw and 'hook' in video_prompt_raw['speech'] and 'tip' in video_prompt_raw['speech']:
-                        # Handle new speech format
-                        hook_text = video_prompt_raw['speech']['hook']
-                        tip_text = video_prompt_raw['speech']['tip']
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'speech' in video_prompt_raw and isinstance(video_prompt_raw['speech'], dict) and 'hook' in video_prompt_raw['speech'] and 'tip' in video_prompt_raw['speech']:
-                        # Handle speech format with hook and tip as strings
-                        hook_text = video_prompt_raw['speech']['hook']
-                        tip_text = video_prompt_raw['speech']['tip']
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
-                        # Handle direct hook and tip format
-                        hook_data = video_prompt_raw['hook']
-                        tip_data = video_prompt_raw['tip']
-                        if isinstance(hook_data, dict):
-                            hook_text = hook_data.get('text', hook_data.get('speech', ''))
-                        else:
-                            hook_text = str(hook_data)
-                        if isinstance(tip_data, dict):
-                            tip_text = tip_data.get('text', tip_data.get('speech', ''))
-                        else:
-                            tip_text = str(tip_data)
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'content' in video_prompt_raw and 'hook' in video_prompt_raw['content'] and 'tip' in video_prompt_raw['content']:
-                        # Handle new content format with hook and tip
-                        hook_data = video_prompt_raw['content']['hook']
-                        tip_data = video_prompt_raw['content']['tip']
-                        hook_text = hook_data.get('script', hook_data.get('text', ''))
-                        tip_text = tip_data.get('script', tip_data.get('text', ''))
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'hook' in video_prompt_raw and 'mainTip' in video_prompt_raw:
-                        # Handle new script format
-                        hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
-                        tip_text = video_prompt_raw['mainTip'].get('text', video_prompt_raw['mainTip']) if isinstance(video_prompt_raw['mainTip'], dict) else video_prompt_raw['mainTip']
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
-                        hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
-                        tip_text = video_prompt_raw['tip'].get('text', video_prompt_raw['tip']) if isinstance(video_prompt_raw['tip'], dict) else video_prompt_raw['tip']
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'spoken_content' in video_prompt_raw:
-                        # Handle spoken_content format
-                        spoken = video_prompt_raw['spoken_content']
-                        hook_text = spoken.get('hook', '')
-                        tip_text = spoken.get('tip', '')
-                        video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen. Start with 2-second silence before speech begins to prevent audio cutoff."
-                    elif 'timing_breakdown' in video_prompt_raw:
-                        # Handle timing_breakdown format
-                        timing = video_prompt_raw['timing_breakdown']
-                        parts = []
-                        for key, value in timing.items():
-                            if isinstance(value, str) and ('Hook:' in value or 'Tip:' in value):
-                                parts.append(value)
-                        video_prompt = " ".join(parts) if parts else str(video_prompt_raw)
-                    else:
-                        video_prompt = str(video_prompt_raw)
-                else:
-                    video_prompt = str(video_prompt_raw)
+                # Test prompt conversion using the same logic as production
+                # Create the final Sora prompt with remedy content
+                # Prefer composing speech from remedy content to ensure descriptive guidance
+                goal = self._infer_goal_phrase(content_data.get('blog_post', {}))
+                composed_from_remedy = self._compose_speech_from_remedy(remedy_content, max_words=14, lead_in=f"To {goal.split('to')[-1].strip()}")
+                speech_text = composed_from_remedy or self._extract_speech_text(video_prompt_raw) or "Try this natural remedy for better health"
+                speech_text = self._constrain_speech_length(speech_text, max_words=14)
                 
-                # Ensure prompt is concise for 12-second video
-                if len(video_prompt) > 200:
-                    video_prompt = video_prompt[:200] + "..."
+                # Optimize ONLY the spoken line to ensure it fits 8-10 seconds
+                optimized_speech = speech_text
+                try:
+                    if len(speech_text) > 80:
+                        print("   🤖 Optimizing speech line to fit 8-10 seconds...")
+                        maybe_optimized = self._optimize_video_prompt(speech_text)
+                        if maybe_optimized and len(maybe_optimized) <= 80:
+                            optimized_speech = maybe_optimized
+                            print(f"   ✅ Speech optimized: {len(optimized_speech)} chars")
+                        else:
+                            optimized_speech = speech_text[:80].rstrip() + ('' if len(speech_text) <= 80 else '...')
+                            print("   ⚠️ Using truncated speech line (≤80 chars)")
+                except Exception as e:
+                    print(f"   ⚠️ Speech optimization failed: {e}")
                 
-                print(f"   Video Prompt Length: {len(video_prompt)} chars")
-                print(f"   Video Prompt Preview: {video_prompt[:100]}...")
+                # Create the final Sora prompt with remedy content
+                video_prompt = (
+                    f"A white blonde doctor in her 30s appears in the bottom left corner of the screen. "
+                    f"Deliver a natural, human-sounding tip describing the remedy steps conversationally (no exact script provided). "
+                    f"Keep it concise and clear; speak at a faster pace; let the model choose wording and pacing. "
+                    f"End the video immediately when the main remedy/tip is completed - no supporting sentences or prolonging. "
+                    f"Begin speaking after a 0.5-second silence and finish by ~11 seconds to avoid cutoff. "
+                    f"The background shows a full-screen demonstration of {remedy_content}. "
+                    f"No person should be visible in the background, only the remedy preparation process."
+                )
                 
-                # Check if prompt is appropriate for 12-second video - MUCH STRICTER
-                if len(video_prompt) < 20:
-                    print("   ⚠️ Video prompt might be too short")
-                elif len(video_prompt) > 80:
-                    print("   ⚠️ Video prompt is TOO LONG for 12 seconds (must be ≤80 chars)")
-                    print("   🤖 Optimizing prompt with AI to fit 12-second criteria...")
-                    
-                    # Use AI to optimize the prompt for 12-second video
-                    optimized_prompt = self._optimize_video_prompt(video_prompt)
-                    if optimized_prompt and len(optimized_prompt) <= 80:
-                        video_prompt = optimized_prompt
-                        print(f"   ✅ Prompt optimized: {len(video_prompt)} chars (within 80 char limit)")
-                        print(f"   📝 Optimized content: {video_prompt}")
-                    else:
-                        print("   ⚠️ Could not optimize prompt - using aggressive truncation")
-                        video_prompt = video_prompt[:80] + "..."
-                else:
-                    print("   ✅ Video prompt length looks good for 12-second video")
+                # Show the exact prompt that would be sent to Sora for validation
+                print(f"\n🎬 TEST MODE SORA PROMPT VALIDATION:")
+                print(f"   📝 Prompt Length: {len(video_prompt)} characters")
+                print(f"   📋 Full Prompt: {video_prompt}")
+                print(f"   🎯 Speech: delegated to Sora (natural delivery, concise)")
+                print(f"   🔧 Remedy Content: {remedy_content}")
+                
+                # Remove strict length checks on full prompt; it's descriptive by design
                 
                 print("✅ Video prompt processing test completed (NO API call made)")
             else:
@@ -500,85 +714,58 @@ Return ONLY the optimized prompt, nothing else.
         print("\nStep 3: Generating video with Sora...")
         video_prompt_raw = video_prompt_data.get('content') or video_prompt_data.get('prompt') or video_prompt_data.get('script') or video_prompt_data.get('speech') or video_prompt_data
         
+        # Extract remedy content from blog post for better video prompts
+        remedy_content = self._extract_remedy_content(content_data.get('blog_post', {}))
+        if remedy_content:
+            print(f"   📋 Extracted remedy content: {remedy_content}")
+        
         if not video_prompt_raw:
             return {
                 "success": False,
                 "error": "No video prompt found in content data"
             }
         
-        # Convert structured prompt to string format for Sora
-        if isinstance(video_prompt_raw, list):
-            # Convert array of prompt objects to a single string
-            video_prompt = " ".join([
-                f"{item.get('timestamp', item.get('time', ''))}: {item.get('text', item.get('description', ''))}" 
-                for item in video_prompt_raw
-            ])
-        elif isinstance(video_prompt_raw, dict):
-            # Handle dictionary format - extract key content
-            if 'script' in video_prompt_raw and isinstance(video_prompt_raw['script'], list):
-                # Handle new script format with frames and text overlays
-                script_frames = video_prompt_raw['script']
-                if len(script_frames) >= 2:
-                    frame1_text = script_frames[0].get('text_overlay', '')
-                    frame2_text = script_frames[1].get('text_overlay', '')
-                    video_prompt = f"Expert says: '{frame1_text} {frame2_text}'"
-                else:
-                    video_prompt = str(video_prompt_raw)
-            elif 'content' in video_prompt_raw and 'hook' in video_prompt_raw['content'] and 'tip' in video_prompt_raw['content']:
-                # Handle new content format with hook and tip
-                hook_data = video_prompt_raw['content']['hook']
-                tip_data = video_prompt_raw['content']['tip']
-                hook_text = hook_data.get('text', hook_data.get('speech', ''))
-                tip_text = tip_data.get('speech', tip_data.get('text', ''))
-                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
-            elif 'speech' in video_prompt_raw and 'hook' in video_prompt_raw['speech'] and 'tip' in video_prompt_raw['speech']:
-                # Handle new speech format
-                hook_text = video_prompt_raw['speech']['hook']
-                tip_text = video_prompt_raw['speech']['tip']
-                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
-            elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
-                # Handle direct hook and tip format
-                hook_data = video_prompt_raw['hook']
-                tip_data = video_prompt_raw['tip']
-                if isinstance(hook_data, dict):
-                    hook_text = hook_data.get('text', hook_data.get('speech', ''))
-                else:
-                    hook_text = str(hook_data)
-                if isinstance(tip_data, dict):
-                    tip_text = tip_data.get('text', tip_data.get('speech', ''))
-                else:
-                    tip_text = str(tip_data)
-                video_prompt = f"Expert says: '{hook_text} {tip_text}' First frame shows '{hook_text}' as large, bold, readable text overlay in center of screen."
-            elif 'hook' in video_prompt_raw and 'mainTip' in video_prompt_raw:
-                # Handle new script format
-                hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
-                tip_text = video_prompt_raw['mainTip'].get('text', video_prompt_raw['mainTip']) if isinstance(video_prompt_raw['mainTip'], dict) else video_prompt_raw['mainTip']
-                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
-            elif 'hook' in video_prompt_raw and 'tip' in video_prompt_raw:
-                hook_text = video_prompt_raw['hook'].get('text', video_prompt_raw['hook']) if isinstance(video_prompt_raw['hook'], dict) else video_prompt_raw['hook']
-                tip_text = video_prompt_raw['tip'].get('text', video_prompt_raw['tip']) if isinstance(video_prompt_raw['tip'], dict) else video_prompt_raw['tip']
-                video_prompt = f"Expert says: '{hook_text} {tip_text}' Start with 2-second silence before speech begins to prevent audio cutoff."
-            elif 'content' in video_prompt_raw and isinstance(video_prompt_raw['content'], list):
-                # Handle content array format
-                video_prompt = " ".join([
-                    f"{item.get('timestamp', item.get('time', ''))}: {item.get('text', item.get('description', ''))}" 
-                    for item in video_prompt_raw['content']
-                ])
-            else:
-                video_prompt = str(video_prompt_raw)
-        else:
-            video_prompt = str(video_prompt_raw)
+        # Create proper natural language prompt for Sora using remedy content
+        # Create the final Sora prompt with remedy content
+        # Prefer composing speech from remedy content to ensure descriptive guidance
+        goal = self._infer_goal_phrase(content_data.get('blog_post', {}))
+        composed_from_remedy = self._compose_speech_from_remedy(remedy_content, max_words=14, lead_in=f"To {goal.split('to')[-1].strip()}")
+        speech_text = composed_from_remedy or self._extract_speech_text(video_prompt_raw) or "Try this natural remedy for better health"
+        speech_text = self._constrain_speech_length(speech_text, max_words=14)
         
-        # Ensure prompt is concise for 12-second video - MUCH STRICTER
-        if len(video_prompt) > 80:
-            print("   🤖 Optimizing prompt with AI to fit 12-second criteria...")
-            optimized_prompt = self._optimize_video_prompt(video_prompt)
-            if optimized_prompt and len(optimized_prompt) <= 80:
-                video_prompt = optimized_prompt
-                print(f"   ✅ Prompt optimized: {len(video_prompt)} chars (within 80 char limit)")
-            else:
-                print("   ⚠️ Could not optimize prompt - using aggressive truncation")
-                video_prompt = video_prompt[:80] + "..."
+        # Optimize ONLY the spoken line to ensure it fits 8-10 seconds
+        optimized_speech = speech_text
+        try:
+            if len(speech_text) > 80:
+                print("   🤖 Optimizing speech line to fit 8-10 seconds...")
+                maybe_optimized = self._optimize_video_prompt(speech_text)
+                if maybe_optimized and len(maybe_optimized) <= 80:
+                    optimized_speech = maybe_optimized
+                    print(f"   ✅ Speech optimized: {len(optimized_speech)} chars")
+                else:
+                    # Aggressive truncate if needed
+                    optimized_speech = speech_text[:80].rstrip() + ('' if len(speech_text) <= 80 else '...')
+                    print("   ⚠️ Using truncated speech line (≤80 chars)")
+        except Exception as e:
+            print(f"   ⚠️ Speech optimization failed: {e}")
+        
+        # Create the final Sora prompt with remedy content
+        video_prompt = (
+            f"A white blonde doctor in her 30s appears in the bottom left corner of the screen. "
+            f"Deliver a natural, human-sounding tip describing the remedy steps conversationally (no exact script provided). "
+            f"Keep it concise and clear; speak at a faster pace; let the model choose wording and pacing. "
+            f"End the video immediately when the main remedy/tip is completed - no supporting sentences or prolonging. "
+            f"Begin speaking after a 0.5-second silence and finish by ~11 seconds to avoid cutoff. "
+            f"The background shows a full-screen demonstration of {remedy_content}. "
+            f"No person should be visible in the background, only the remedy preparation process."
+        )
+        
+        # Show the exact prompt being sent to Sora for validation
+        print(f"\n🎬 FINAL SORA PROMPT VALIDATION:")
+        print(f"   📝 Prompt Length: {len(video_prompt)} characters")
+        print(f"   📋 Full Prompt: {video_prompt}")
+        print(f"   🎯 Speech: delegated to Sora (natural delivery, concise)")
+        print(f"   🔧 Remedy Content: {remedy_content}")
         
         # Use .env settings for video generation (not content generator duration)
         video_result = self.video_generator.generate_video(
